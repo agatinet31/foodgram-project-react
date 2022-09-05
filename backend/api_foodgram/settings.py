@@ -20,7 +20,6 @@ INSTALLED_APPS = [
     'djoser',
     'django_filters',
     'users.apps.UsersConfig',
-    'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
 ]
 
@@ -58,6 +57,14 @@ WSGI_APPLICATION = 'api_foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
+
+"""
+DATABASES = {
+    'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.getenv('DB_NAME', 'db'),
         'USER': os.getenv('POSTGRES_USER', 'user'),
@@ -66,6 +73,7 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '5432')
     }
 }
+"""
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -111,9 +119,10 @@ REST_FRAMEWORK = {
 
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
 
-    'PAGE_SIZE': 5,
+    'PAGE_SIZE': 10,
 }
 
+"""
 DJOSER = {
     'LOGIN_FIELD': 'email',
     'HIDE_USERS': False,
@@ -127,6 +136,7 @@ DJOSER = {
         'user_list': ['rest_framework.permissions.AllowAny']
     },
 }
+"""
 
 AUTH_USER_MODEL = 'users.CustomUser'
 

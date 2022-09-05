@@ -15,9 +15,7 @@ class CustomUserAdmin(UserAdmin):
         (None, {
             'fields': (
                 'username',
-                'password',
-                'role',
-                'confirmation_code'
+                'password'
             )
         }
         ),
@@ -25,8 +23,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': (
                 'first_name',
                 'last_name',
-                'email',
-                'bio'
+                'email'
             )
         }),
         (_('Permissions'), {
@@ -38,6 +35,12 @@ class CustomUserAdmin(UserAdmin):
                 'user_permissions'
             ),
         }),
+        (_('Subscribed / Subscribers'), {
+            'fields': (
+                'subscribed',
+                'subscribers'
+            )
+        }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
     )
     add_fieldsets = (
@@ -47,13 +50,13 @@ class CustomUserAdmin(UserAdmin):
                 'username',
                 'password1',
                 'password2',
-                'role',
                 'email',
             ),
         }),
     )
-    list_display = ('username', 'email', 'role', 'confirmation_code',)
-    list_filter = ('username', 'email', 'role',)
+    filter_horizontal = ('subscribed', 'subscribers')
+    list_display = ('username', 'email',)
+    list_filter = ('username', 'email',)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
