@@ -48,15 +48,17 @@ class CustomUserAdmin(UserAdmin):
             'classes': ('wide',),
             'fields': (
                 'username',
+                'first_name',
+                'last_name',
+                'email',
                 'password1',
                 'password2',
-                'email',
             ),
         }),
     )
     filter_horizontal = ('subscribed', 'subscribers')
-    list_display = ('username', 'email',)
-    list_filter = ('username', 'email',)
+    list_display = ('username', 'first_name', 'last_name', 'email',)
+    list_filter = ('username', 'first_name', 'last_name', 'email',)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)

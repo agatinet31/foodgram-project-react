@@ -15,22 +15,8 @@ class CustomUserCreationForm(UserCreationForm):
 
 class CustomUserChangeForm(UserChangeForm):
     """Форма изменения данных пользователя."""
-    subscribed = ModelMultipleChoiceField(
-        queryset=CustomUser.objects.all(),
-        required=False,
-        widget=FilteredSelectMultiple(
-            _('subscribed'),
-            is_stacked=False
-        )
-    )
-    subscribers = ModelMultipleChoiceField(
-        queryset=CustomUser.objects.all(),
-        required=False,
-        widget=FilteredSelectMultiple(
-            _('subscribers'),
-            is_stacked=False
-        )
-    )
+    subscribed = ModelMultipleChoiceField(queryset=None)
+    subscribers = ModelMultipleChoiceField(queryset=None)
 
     class Meta:
         model = CustomUser
@@ -40,18 +26,20 @@ class CustomUserChangeForm(UserChangeForm):
         super(UserChangeForm, self).__init__(*args, **kwargs)
         if self.instance and self.instance.pk:
             self.fields['subscribed'] = ModelMultipleChoiceField(
+                label=_('subscribed'),
                 queryset=CustomUser.objects.all().exclude(pk=self.instance.pk),
                 required=False,
                 widget=FilteredSelectMultiple(
-                    verbose_name='subscribed',
+                    _('subscribed'),
                     is_stacked=False
                 )
             )
             self.fields['subscribers'] = ModelMultipleChoiceField(
+                label=_('subscribers'),
                 queryset=CustomUser.objects.all().exclude(pk=self.instance.pk),
                 required=False,
                 widget=FilteredSelectMultiple(
-                    verbose_name='subscribers',
+                    _('subscribers'),
                     is_stacked=False
                 )
             )

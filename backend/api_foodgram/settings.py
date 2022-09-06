@@ -1,12 +1,19 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
+DEBUG = os.getenv('DEBUG', False)
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-r(9dd5yaw_17m5kxki1vb^r6v@x^-g#zi_to7487*!)08oxwf)')
+SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = False
-
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    '[::1]',
+]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -21,6 +28,7 @@ INSTALLED_APPS = [
     'django_filters',
     'users.apps.UsersConfig',
     'api.apps.ApiConfig',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -31,6 +39,11 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
+]
+
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'api_foodgram.urls'
@@ -57,14 +70,6 @@ WSGI_APPLICATION = 'api_foodgram.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
-
-"""
-DATABASES = {
-    'default': {
         'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
         'NAME': os.getenv('DB_NAME', 'db'),
         'USER': os.getenv('POSTGRES_USER', 'user'),
@@ -73,7 +78,6 @@ DATABASES = {
         'PORT': os.getenv('DB_PORT', '5432')
     }
 }
-"""
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -90,7 +94,11 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
-LANGUAGE_CODE = 'ru'
+LANGUAGE_CODE = 'ru-ru'
+
+LOCALE_PATHS = (
+    os.path.join(BASE_DIR, 'locale'),
+)
 
 TIME_ZONE = 'UTC'
 
