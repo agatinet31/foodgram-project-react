@@ -1,17 +1,26 @@
+from django.core.validators import validate_slug
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 
 
-class PubDateModel(models.Model):
-    """Абстрактная модель. Добавляет дату создания."""
-    pub_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата публикации'
+class SlugDataModel(models.Model):
+    """Абстрактная Slug модель."""
+    name = models.CharField(
+        _('name'),
+        unique=True,
+        max_length=256
     )
-    edit_date = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name='Дата редактирования'
+    slug = models.SlugField(
+        _('slug'),
+        unique=True,
+        max_length=50,
+        validators=[validate_slug]
     )
 
     class Meta:
         """Метаданые абстрактной модели."""
         abstract = True
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name

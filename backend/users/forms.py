@@ -27,7 +27,7 @@ class CustomUserChangeForm(UserChangeForm):
         if self.instance and self.instance.pk:
             self.fields['subscribed'] = ModelMultipleChoiceField(
                 label=_('subscribed'),
-                queryset=CustomUser.objects.all().exclude(pk=self.instance.pk),
+                queryset=CustomUser.objects.all(),
                 required=False,
                 widget=FilteredSelectMultiple(
                     _('subscribed'),
@@ -36,7 +36,7 @@ class CustomUserChangeForm(UserChangeForm):
             )
             self.fields['subscribers'] = ModelMultipleChoiceField(
                 label=_('subscribers'),
-                queryset=CustomUser.objects.all().exclude(pk=self.instance.pk),
+                queryset=CustomUser.objects.all(),
                 required=False,
                 widget=FilteredSelectMultiple(
                     _('subscribers'),

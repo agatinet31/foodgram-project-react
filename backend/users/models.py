@@ -43,7 +43,8 @@ class CustomUser(AbstractUser):
     )
     subscribed = models.ManyToManyField(
         'self',
-        related_name='subscribers',
+        through='Subscriber',
+        related_name='%(class)ss',
         blank=True,
         symmetrical=False
     )
@@ -57,20 +58,57 @@ class CustomUser(AbstractUser):
                 check=~models.Q(username__iexact=USER_ME),
                 name="reserve_USER_ME"
             ),
-            models.UniqueConstraint(
-                fields=[
-                    'subscribed__from_customuser',
-                    'subscribed__to_customuser'
-                ],
-                name='unique_user_subscribers',
-            ),
-            models.CheckConstraint(
-                check=~models.Q(
-                    subscribed__from_customuser=models.F('subscribed_to_customuser_id')
-                ),
-                name='check_not_loop_user_subscribed'
-            ),
         ]
 
     def __str__(self):
+        """Вывод данных пользователя."""
         return f'{self.username} ({self.get_full_name()}), email: {self.email}'
+
+
+class AuthorPubDateModel(models.Model):
+    """Абстрактная модель. Добавляет дату создания и автора."""
+    author = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='author_%(class)ss',
+        verbose_name=_('author'),
+    )
+    pub_date = models.DateTimeField(
+        _('public date'),
+        auto_now_add=True,
+        db_index=True
+    )
+
+    class Meta:
+        """Метаданые абстрактной модели."""
+        abstract = True
+        ordering = ('-pub_date',)
+
+
+class Subscriber(AuthorPubDateModel):
+    """Модель подписчика на авторов."""
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='user_%(class)ss',
+        verbose_name=_('subscriber'),
+    )
+
+    class Meta:
+        """Метаданные модели подписчиков."""
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'author'],
+                name='unique_user_author_subscriber'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(user_id=models.F('author_id')),
+                name='check_not_loop_user_author'
+            ),
+        ]
+        verbose_name = 'Подписчик'
+        verbose_name_plural = 'Подписчики'
+
+    def __str__(self):
+        """Вывод подписчика и автора."""
+        return f'{self.subscriber.username}:{self.author.username}'
