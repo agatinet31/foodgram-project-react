@@ -2,12 +2,18 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from .forms import CustomUserChangeForm, CustomUserCreationForm
-from .models import CustomUser
+from users.forms import CustomUserChangeForm, CustomUserCreationForm
+from users.models import CustomUser, Subscriber
+
+
+class SubscribersInlineAdmin(admin.TabularInline):
+    model = CustomUser.subscribed.through
+    fk_name = 'user'
 
 
 class CustomUserAdmin(UserAdmin):
     """Класс определяющий настройки кастомной модели User в админке."""
+    # inlines = (SubscribersInlineAdmin,)
     add_form = CustomUserCreationForm
     form = CustomUserChangeForm
     model = CustomUser
@@ -26,6 +32,11 @@ class CustomUserAdmin(UserAdmin):
                 'email'
             )
         }),
+        (_('Subscribed / Subscribers'), {
+            'fields': (
+                'subscribed',
+            )
+        }),
         (_('Permissions'), {
             'fields': (
                 'is_active',
@@ -35,14 +46,8 @@ class CustomUserAdmin(UserAdmin):
                 'user_permissions'
             ),
         }),
-        (_('Subscribed / Subscribers'), {
-            'fields': (
-                'subscribed',
-                'subscribers'
-            )
-        }),
         (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
-    )
+    )    
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -56,9 +61,22 @@ class CustomUserAdmin(UserAdmin):
             ),
         }),
     )
-    filter_horizontal = ('subscribed', 'subscribers')
-    list_display = ('username', 'first_name', 'last_name', 'email',)
+    # autocomplete_fields = ('subscribed',)
+    filter_horizontal = ('subscribed', )
+    list_display = ('username', 'first_name', 'last_name', 'email', )
     list_filter = ('username', 'first_name', 'last_name', 'email',)
 
 
 admin.site.register(CustomUser, CustomUserAdmin)
+
+"""
+
+        (_('Subscribed / Subscribers'), {
+            'fields': (
+                'subscribed',
+                'subscribers'
+            )
+        }),
+
+    filter_horizontal = ('subscribed', 'subscribers')
+"""

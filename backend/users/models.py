@@ -44,7 +44,8 @@ class CustomUser(AbstractUser):
     subscribed = models.ManyToManyField(
         'self',
         through='Subscriber',
-        related_name='%(class)ss',
+        through_fields=('user', 'author'),
+        related_name='my_subscribers',
         blank=True,
         symmetrical=False
     )
@@ -52,7 +53,6 @@ class CustomUser(AbstractUser):
 
     class Meta(AbstractUser.Meta):
         ordering = ['username']
-
         constraints = [
             models.CheckConstraint(
                 check=~models.Q(username__iexact=USER_ME),
@@ -65,37 +65,29 @@ class CustomUser(AbstractUser):
         return f'{self.username} ({self.get_full_name()}), email: {self.email}'
 
 
-class AuthorPubDateModel(models.Model):
-    """Абстрактная модель. Добавляет дату создания и автора."""
+class Subscriber(models.Model):
+    """Модель подписчика на авторов."""
+    user = models.ForeignKey(
+        CustomUser,
+        on_delete=models.CASCADE,
+        related_name='user_subscribers',
+        verbose_name=_('subscriber'),
+    )
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='author_%(class)ss',
-        verbose_name=_('author'),
+        related_name='author_subscribers',
+        verbose_name=_('subscriber'),
     )
-    pub_date = models.DateTimeField(
-        _('public date'),
+    date_create = models.DateTimeField(
+        _('date create'),
         auto_now_add=True,
         db_index=True
     )
 
     class Meta:
-        """Метаданые абстрактной модели."""
-        abstract = True
-        ordering = ('-pub_date',)
-
-
-class Subscriber(AuthorPubDateModel):
-    """Модель подписчика на авторов."""
-    user = models.ForeignKey(
-        CustomUser,
-        on_delete=models.CASCADE,
-        related_name='user_%(class)ss',
-        verbose_name=_('subscriber'),
-    )
-
-    class Meta:
         """Метаданные модели подписчиков."""
+        auto_created = True
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
@@ -106,9 +98,7 @@ class Subscriber(AuthorPubDateModel):
                 name='check_not_loop_user_author'
             ),
         ]
-        verbose_name = 'Подписчик'
-        verbose_name_plural = 'Подписчики'
 
     def __str__(self):
         """Вывод подписчика и автора."""
-        return f'{self.subscriber.username}:{self.author.username}'
+        return f'{self.user.username}:{self.author.username}'

@@ -14,9 +14,30 @@ class CustomUserCreationForm(UserCreationForm):
 
 
 class CustomUserChangeForm(UserChangeForm):
-    """Форма изменения данных пользователя."""
-    subscribed = ModelMultipleChoiceField(queryset=None)
-    subscribers = ModelMultipleChoiceField(queryset=None)
+
+    """Форма изменения данных пользователя.
+    subscribed = ModelMultipleChoiceField(
+        label=_('subscribed'),
+        queryset=CustomUser.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple(
+            _('subscribed'),
+            is_stacked=False
+        )
+    )
+    subscribers = ModelMultipleChoiceField(
+        label=_('subscribers'),
+        queryset=CustomUser.objects.all(),
+        required=False,
+        widget=FilteredSelectMultiple(
+            _('subscribers'),
+            is_stacked=False
+        )
+    )
+    .exclude(pk=self.instance.pk)
+    """
+    # subscribed = ModelMultipleChoiceField(queryset=None)
+   # subscribers = ModelMultipleChoiceField(queryset=None)
 
     class Meta:
         model = CustomUser
@@ -24,16 +45,9 @@ class CustomUserChangeForm(UserChangeForm):
 
     def __init__(self, *args, **kwargs):
         super(UserChangeForm, self).__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            self.fields['subscribed'] = ModelMultipleChoiceField(
-                label=_('subscribed'),
-                queryset=CustomUser.objects.all(),
-                required=False,
-                widget=FilteredSelectMultiple(
-                    _('subscribed'),
-                    is_stacked=False
-                )
-            )
+        if self.instance.pk:
+            # self.fields['subscribed'].initial = self.instance.subscribed.all()
+            """
             self.fields['subscribers'] = ModelMultipleChoiceField(
                 label=_('subscribers'),
                 queryset=CustomUser.objects.all(),
@@ -43,5 +57,4 @@ class CustomUserChangeForm(UserChangeForm):
                     is_stacked=False
                 )
             )
-            subscribers = self.instance.subscribers.all()
-            self.fields['subscribers'].initial = subscribers
+            """
