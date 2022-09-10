@@ -4,6 +4,7 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from api.settings import USER_ME
+from core.validators import letter_only_re
 
 
 class CustomUser(AbstractUser):
@@ -11,6 +12,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(
         _('first name'),
         max_length=150,
+        validators=[letter_only_re],
         help_text=_(
             'Required. Enter first name, please. '
             '150 characters or fewer. Letters only.'
@@ -19,6 +21,7 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(
         _('last name'),
         max_length=150,
+        validators=[letter_only_re],
         help_text=_(
             'Required. Enter last name, please. '
             '150 characters or fewer. Letters only.'
@@ -28,11 +31,11 @@ class CustomUser(AbstractUser):
         _('email'),
         max_length=254,
         unique=True,
+        validators=[EmailValidator],
         help_text=_(
             'Required. A valid email address, please. '
             '254 characters or fewer. Letters, digits and @/./+/-/_ only.'
         ),
-        validators=[EmailValidator],
         error_messages={
             'unique': _('A user with that email already exists.'),
         }
@@ -47,7 +50,8 @@ class CustomUser(AbstractUser):
         through_fields=('user', 'author'),
         related_name='my_subscribers',
         blank=True,
-        symmetrical=False
+        symmetrical=False,
+        verbose_name=_('subscribed'),
     )
     REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
 
@@ -60,6 +64,10 @@ class CustomUser(AbstractUser):
             ),
         ]
 
+    @property
+    def is_subscribed(self):
+        return self.subscribed.all().count() > 0
+
     def __str__(self):
         """Вывод данных пользователя."""
         return f'{self.username} ({self.get_full_name()}), email: {self.email}'
@@ -71,23 +79,22 @@ class Subscriber(models.Model):
         CustomUser,
         on_delete=models.CASCADE,
         related_name='user_subscribers',
-        verbose_name=_('subscriber'),
+        verbose_name=_('user'),
     )
     author = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
         related_name='author_subscribers',
-        verbose_name=_('subscriber'),
+        verbose_name=_('author'),
     )
-    date_create = models.DateTimeField(
-        _('date create'),
+    date_subscriber = models.DateTimeField(
+        _('date subscriber'),
         auto_now_add=True,
         db_index=True
     )
 
     class Meta:
         """Метаданные модели подписчиков."""
-        auto_created = True
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'author'],
@@ -98,6 +105,8 @@ class Subscriber(models.Model):
                 name='check_not_loop_user_author'
             ),
         ]
+        verbose_name = _('subscriber')
+        verbose_name_plural = _('subscribers')
 
     def __str__(self):
         """Вывод подписчика и автора."""

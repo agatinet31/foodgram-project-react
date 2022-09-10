@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'django_filters',
     'core.apps.CoreConfig',
     'users.apps.UsersConfig',
+    'recipes.apps.RecipesConfig',
     'api.apps.ApiConfig',
     'debug_toolbar',
 ]
