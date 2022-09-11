@@ -4,7 +4,8 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from api.settings import USER_ME
-from core.validators import letter_only_re
+from core.utils import is_not_empty_query
+from core.validators import validate_only_letters
 
 
 class CustomUser(AbstractUser):
@@ -12,7 +13,7 @@ class CustomUser(AbstractUser):
     first_name = models.CharField(
         _('first name'),
         max_length=150,
-        validators=[letter_only_re],
+        validators=[validate_only_letters],
         help_text=_(
             'Required. Enter first name, please. '
             '150 characters or fewer. Letters only.'
@@ -21,7 +22,7 @@ class CustomUser(AbstractUser):
     last_name = models.CharField(
         _('last name'),
         max_length=150,
-        validators=[letter_only_re],
+        validators=[validate_only_letters],
         help_text=_(
             'Required. Enter last name, please. '
             '150 characters or fewer. Letters only.'
@@ -46,12 +47,13 @@ class CustomUser(AbstractUser):
     )
     subscribed = models.ManyToManyField(
         'self',
+        verbose_name=_('subscribed'),
+        blank=True,
+        symmetrical=False,
         through='Subscriber',
         through_fields=('user', 'author'),
         related_name='my_subscribers',
-        blank=True,
-        symmetrical=False,
-        verbose_name=_('subscribed'),
+        help_text=_('Subscribed for this user.'),
     )
     REQUIRED_FIELDS = ['first_name', 'last_name', 'email']
 
@@ -66,7 +68,8 @@ class CustomUser(AbstractUser):
 
     @property
     def is_subscribed(self):
-        return self.subscribed.all().count() > 0
+        """Проверка наличия подписок на авторов."""
+        return is_not_empty_query(self.subscribed)
 
     def __str__(self):
         """Вывод данных пользователя."""
@@ -77,15 +80,15 @@ class Subscriber(models.Model):
     """Модель подписчика на авторов."""
     user = models.ForeignKey(
         CustomUser,
+        verbose_name=_('user'),
         on_delete=models.CASCADE,
         related_name='user_subscribers',
-        verbose_name=_('user'),
     )
     author = models.ForeignKey(
         CustomUser,
+        verbose_name=_('author'),
         on_delete=models.CASCADE,
         related_name='author_subscribers',
-        verbose_name=_('author'),
     )
     date_subscriber = models.DateTimeField(
         _('date subscriber'),

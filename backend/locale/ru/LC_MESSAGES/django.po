@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-09-06 14:09+0300\n"
+"POT-Creation-Date: 2022-09-11 19:42+0300\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -20,30 +20,238 @@ msgstr ""
 "%10<=4 && (n%100<12 || n%100>14) ? 1 : n%10==0 || (n%10>=5 && n%10<=9) || (n"
 "%100>=11 && n%100<=14)? 2 : 3);\n"
 
-msgid "Subscribed / Subscribers"
-msgstr "Подписки / Подписчики"
+#: .\core\validators.py:7
+msgid "Enter a valid string value consisting of only letters."
+msgstr "Введите валидную строку, содержащую только буквы"
 
-msgid "subscribed"
-msgstr "подписки"
-
-msgid "subscribers"
-msgstr "подписчики"
-
+#: .\core\validators.py:15
 msgid ""
-"Required. Enter last name, please. 150 characters or fewer. Letters only."
+"The valid hexadecimal color code must satisfy the following conditions:1. It "
+"should start from ‘#’ symbol.2. It should be followed by the letters from a-"
+"f, A-F and/or digits from 0-9.3. The length of the hexadecimal color code "
+"should be either 6 or 3, excluding ‘#’ symbol."
 msgstr ""
-"Обязательное поле. Введите фамилию. 150 символов или меньше. Только буквы."
+"Валидный шестнадцатеричный код цвета должен удовлетворять следующим условиям:"
+"1. Он должен начинаться с символа «#».@"
+"2. За ним должны следовать буквы от a до f, от A до F и/или цифры от 0 до 9."
+"3. Длина шестнадцатеричного кода цвета должна быть 6 или 3, за исключением символа «#»."
 
+#: .\core\validators.py:30
+msgid ""
+"Enter a valid `tag` value consisting of only letters, digit. The first "
+"symbol can be `#`."
+msgstr ""
+"Введите валидное значение тега, содержащее только буквы и цифры."
+"Первый симмвол может быть `#`."
+
+#: .\core\validators.py:40
+msgid ""
+"Enter a valid `name` value consisting of only letters, digit. and symbols _ "
+"( )The first symbol only letter."
+msgstr ""
+"Введите валидное значение наименования, содержащее только буквы, цифры и символы _ ``( )"
+"Первый символ должен быть буквой."
+
+#: .\recipes\admin.py:13 .\recipes\admin.py:22 .\recipes\admin.py:48
+#: .\recipes\admin.py:65 .\users\admin.py:34
+msgid "empty"
+msgstr "пусто"
+
+#: .\recipes\models.py:16 .\recipes\models.py:64 .\recipes\models.py:99
+msgid "name"
+msgstr "наименование"
+
+#: .\recipes\models.py:21
+msgid ""
+"Required. Enter tag name, please. 150 characters or fewer. Letters, digit "
+"onlyand first symbol can be `#`"
+msgstr ""
+"Обязательное поле. Введите наименование тега. 150 символов или менее."
+"Буквы, цифры. Первый символ может быть `#`."
+
+#: .\recipes\models.py:26
+msgid "A tag with that name already exists."
+msgstr "Тег с таким именем уже создан."
+
+#: .\recipes\models.py:30
+msgid "color HEX-code"
+msgstr "цвет (HEX-код)"
+
+#: .\recipes\models.py:34
+msgid "Required. Enter HEX-code color, please."
+msgstr "Обязательное поле. Введите HEX-код цвета."
+
+#: .\recipes\models.py:36
+msgid "A tag with that color already exists."
+msgstr "Тег с данным цветом уже создан."
+
+#: .\recipes\models.py:40
+msgid "slug"
+msgstr "слаг"
+
+#: .\recipes\models.py:44
+msgid "Required. Enter slug tag, please."
+msgstr "Обязательное поле. Введите слаг тега."
+
+#: .\recipes\models.py:46
+msgid "A tag with that slug already exists."
+msgstr "Тег с указаным слагом уже создан."
+
+#: .\recipes\models.py:53
+msgid "tag"
+msgstr "тег"
+
+#: .\recipes\models.py:54 .\recipes\models.py:114
+msgid "tags"
+msgstr "теги"
+
+#: .\recipes\models.py:69
+msgid ""
+"Required. Enter ingredient name, please. 250 characters or fewer. Letters, "
+"digit symbols _(). The first symbol only letter."
+msgstr ""
+"Обязательное поле. Введите наименование ингридиента. 250 символов или менее."
+"Буквы, цифры и символ _(). Первый символ только буква."
+
+#: .\recipes\models.py:75
+msgid "A ingredient with that name already exists."
+msgstr "Ингридиент с таким наименованием уже создан."
+
+#: .\recipes\models.py:79
+msgid "measurement_unit"
+msgstr "единица измерения"
+
+#: .\recipes\models.py:82
+msgid "Required. Enter measurement_unit, please."
+msgstr "Обязательное поле. Введите единицу измерения."
+
+#: .\recipes\models.py:88 .\recipes\models.py:192
+msgid "ingredient"
+msgstr "ингридиент"
+
+#: .\recipes\models.py:89 .\recipes\models.py:107
+msgid "ingredients"
+msgstr "ингридиенты"
+
+#: .\recipes\models.py:103
+msgid "Required. Enter name recipe, please."
+msgstr "Обязательное поле. Введите наименование рецепта."
+
+#: .\recipes\models.py:120 .\users\models.py:89
+msgid "author"
+msgstr "автор"
+
+#: .\recipes\models.py:123
+msgid "Required. Enter author, please. "
+msgstr "Обязательное поле. Введите имя автора."
+
+#: .\recipes\models.py:127
+msgid "favorites"
+msgstr "избранное"
+
+#: .\recipes\models.py:133
+msgid "shopping_carts"
+msgstr "список покупок"
+
+#: .\recipes\models.py:138
+msgid "public date"
+msgstr "дата публикации"
+
+#: .\recipes\models.py:143
+msgid "image"
+msgstr "изображение"
+
+#: .\recipes\models.py:147
+msgid "recipe text"
+msgstr "текст рецепта"
+
+#: .\recipes\models.py:150
+msgid "cooking_time"
+msgstr "время приготовления"
+
+#: .\recipes\models.py:153
+msgid "Minimum cooking time 1 minute"
+msgstr "Минимальное время приготовления 1 минута."
+
+#: .\recipes\models.py:166 .\recipes\models.py:186
+msgid "recipe"
+msgstr "рецепт"
+
+#: .\recipes\models.py:167
+msgid "recipes"
+msgstr "рецепты"
+
+#: .\recipes\models.py:197
+msgid "amount"
+msgstr "количество"
+
+#: .\recipes\models.py:201
+msgid "The minimum quantity of an ingredient in a recipe is 1"
+msgstr "Минимальное количество ингридиентов в рецепте 1"
+
+#: .\recipes\models.py:215
+msgid "recipe ingredient"
+msgstr "ингридиент рецепта"
+
+#: .\recipes\models.py:216
+msgid "recipe ingredients"
+msgstr "ингридиенты рецепта"
+
+#: .\users\models.py:14
+msgid "first name"
+msgstr "имя"
+
+#: .\users\models.py:18
 msgid ""
 "Required. Enter first name, please. 150 characters or fewer. Letters only."
 msgstr ""
 "Обязательное поле. Введите имя. 150 символов или меньше. Только буквы."
 
+#: .\users\models.py:23
+msgid "last name"
+msgstr "фамилия"
+
+#: .\users\models.py:27
+msgid ""
+"Required. Enter last name, please. 150 characters or fewer. Letters only."
+msgstr ""
+"Обязательное поле. Введите фамилию. 150 символов или меньше. Только буквы."
+#: .\users\models.py:32
+msgid "email"
+msgstr "email"
+
+#: .\users\models.py:37
 msgid ""
 "Required. A valid email address, please. 254 characters or fewer. Letters, "
 "digits and @/./+/-/_ only."
 msgstr ""
-"Обязательное поле. Введите валидное значение электронного адреса. 254 символа или меньше. Только буквы, цифры и символы @/./+/-/_."
+"Обязательное поле. Введите валидный адрес электронной почты."
+"254 символа или менее. Буквы, цифры и символы @/./+/-/_."
 
+#: .\users\models.py:41
 msgid "A user with that email already exists."
-msgstr "Пользователь с таким email уже существует"
+msgstr "Пользователь с таким адресом электронной почты уже существует."
+
+#: .\users\models.py:45
+msgid "password"
+msgstr "пароль"
+
+#: .\users\models.py:50
+msgid "subscribed"
+msgstr "подписан"
+
+#: .\users\models.py:56
+msgid "Subscribed for this user."
+msgstr "подписки пользователя"
+
+#: .\users\models.py:94
+msgid "date subscriber"
+msgstr "дата подписки"
+
+#: .\users\models.py:111
+msgid "subscriber"
+msgstr "подписка"
+
+#: .\users\models.py:112
+msgid "subscribers"
+msgstr "подписки"

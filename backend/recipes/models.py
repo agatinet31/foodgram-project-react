@@ -3,6 +3,7 @@ from django.core.validators import MinValueValidator, validate_slug
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core.utils import is_not_empty_query
 from core.validators import (validate_color_hex_code, validate_only_letters,
                              validate_simple_name, validate_tag)
 
@@ -76,19 +77,13 @@ class Ingredient(models.Model):
     )
     measurement_unit = models.CharField(
         _('measurement_unit'),
-        max_length=10,
+        max_length=50,
         validators=[validate_only_letters],
         help_text=_('Required. Enter measurement_unit, please.'),
     )
 
     class Meta:
         """Метаданные модели ингридиентов."""
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name', 'measurement_unit'],
-                name='unique_ingredient_name_and_unit'
-            )
-        ]
         ordering = ['name']
         verbose_name = _('ingredient')
         verbose_name_plural = _('ingredients')
@@ -103,39 +98,41 @@ class Recipe(models.Model):
     name = models.CharField(
         _('name'),
         max_length=500,
-        unique=True,
         validators=[validate_simple_name],
         help_text=_(
             'Required. Enter name recipe, please.'),
-        error_messages={
-            'unique': _('A recipe with that name already exists.'),
-        }
     )
     ingredients = models.ManyToManyField(
         Ingredient,
+        verbose_name=_('ingredients'),
+        blank=True,
         through='RecipeIngredient',
         related_name='recipes',
-        blank=True,
-        verbose_name=_('ingredients'),
     )
     tags = models.ManyToManyField(
         Tag,
-        related_name='recipes',
-        blank=True,
         verbose_name=_('tags'),
+        blank=True,
+        related_name='recipes',
     )
     author = models.ForeignKey(
         User,
-        on_delete=models.CASCADE,
-        related_name='recipes',
         verbose_name=_('author'),
+        on_delete=models.CASCADE,
+        related_name='author_recipes',
         help_text=_('Required. Enter author, please. ')
     )
     favorites = models.ManyToManyField(
         User,
-        related_name='recipes',
-        blank=True,
         verbose_name=_('favorites'),
+        blank=True,
+        related_name='favorite_recipes',
+    )
+    shopping_carts = models.ManyToManyField(
+        User,
+        verbose_name=_('shopping_carts'),
+        blank=True,
+        related_name='shopping_cart_recipes',
     )
     pub_date = models.DateTimeField(
         _('public date'),
@@ -153,7 +150,7 @@ class Recipe(models.Model):
         _('cooking_time'),
         validators=[
             MinValueValidator(
-                1, message=_('Cooking time must be more than 1 minute')
+                1, message=_('Minimum cooking time 1 minute')
             )
         ]
     )
@@ -161,18 +158,21 @@ class Recipe(models.Model):
     class Meta:
         """Метаданные модели рецептов."""
         indexes = [
+            models.Index(fields=['name'], name='recipe_name_idx'),
             models.Index(fields=['text'], name='recipe_text_idx'),
             models.Index(fields=['pub_date'], name='recipe_pub_date_idx'),
         ]
         ordering = ['-pub_date']
-        constraints = [
-            models.UniqueConstraint(
-                fields=['name', 'measurement_unit'],
-                name='unique_ingredient_name_and_unit'
-            )
-        ]
         verbose_name = _('recipe')
         verbose_name_plural = _('recipes')
+
+    @property
+    def is_favorited(self):
+        return is_not_empty_query(self.favorites)
+
+    @property
+    def is_in_shopping_cart(self):
+        return is_not_empty_query(self.shopping_carts)
 
     def __str__(self):
         """Метод возвращает название рецепта."""
@@ -180,13 +180,26 @@ class Recipe(models.Model):
 
 
 class RecipeIngredient(models.Model):
-    recipe = models.ForeignKey(Recipe, models.CASCADE, to_field="rname")
-    ingredient = models.ForeignKey(Ingredient, models.CASCADE, to_field="iname")
+    """Модель ингридиентов рецепта."""
+    recipe = models.ForeignKey(
+        Recipe,
+        verbose_name=_('recipe'),
+        on_delete=models.CASCADE,
+        related_name='recipe_ingredients'
+    )
+    ingredient = models.ForeignKey(
+        Ingredient,
+        verbose_name=_('ingredient'),
+        on_delete=models.CASCADE,
+        related_name='ingredient_recipes'
+    )
     amount = models.PositiveSmallIntegerField(
         _('amount'),
         validators=[
             MinValueValidator(
-                1, message=_('Ingredient quantity must be greater than 0')
+                1, message=_(
+                    'The minimum quantity of an ingredient in a recipe is 1'
+                )
             )
         ]
     )
@@ -201,12 +214,6 @@ class RecipeIngredient(models.Model):
         ]
         verbose_name = _('recipe ingredient')
         verbose_name_plural = _('recipe ingredients')
-
-    def get_ingredient_recipe(self):
-        """Метод возвращает информацию по ингридиенту рецепта."""
-        return (
-            self.recipe.pk, self.ingredient.pk, self.amount
-        )
 
     def __str__(self):
         """Метод возвращает информацию по ингридиенту рецепта."""

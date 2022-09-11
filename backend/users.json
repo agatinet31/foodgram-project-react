@@ -1,0 +1,83 @@
+[
+{
+  "model": "users.customuser",
+  "pk": 1,
+  "fields": {
+    "last_login": "2022-09-11T12:03:06.362Z",
+    "is_superuser": true,
+    "username": "andrew",
+    "is_staff": true,
+    "is_active": true,
+    "date_joined": "2022-09-11T12:02:03.102Z",
+    "first_name": "\u0410\u043d\u0434\u0440\u0435\u0439",
+    "last_name": "\u041b\u0430\u0431\u0443\u0442\u0438\u043d",
+    "email": "andrew@foodgram.ru",
+    "password": "pbkdf2_sha256$150000$WstY2lIclEE1$MMlzRhiLfV1Bmc9fAuoSFE09WFggDdPp2I0SBVrDuXo=",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.customuser",
+  "pk": 2,
+  "fields": {
+    "last_login": null,
+    "is_superuser": false,
+    "username": "u1",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-09-11T12:05:48.098Z",
+    "first_name": "\u0411\u043e\u0440\u0438\u0441",
+    "last_name": "\u0421\u043c\u0438\u0440\u043d\u043e\u0432",
+    "email": "u1@foodgram.ru",
+    "password": "pbkdf2_sha256$150000$879Lc7jVDdKG$Exc2z/ktQlhYaBSZ9YAG1PDsJ0krQ6rjAa3OOh6r1OI=",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.customuser",
+  "pk": 3,
+  "fields": {
+    "last_login": null,
+    "is_superuser": false,
+    "username": "u2",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-09-11T12:07:09.041Z",
+    "first_name": "\u0410\u043b\u0435\u043a\u0441\u0430\u043d\u0434\u0440",
+    "last_name": "\u041c\u0438\u0445\u0430\u043b\u043a\u043e\u0432",
+    "email": "u2@foodgram.ru",
+    "password": "pbkdf2_sha256$150000$CHxbJKzZ5ESA$KuiHeIjpLfCHCkYq683/C66RwITPq8LLyhSmqLOwbPc=",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.customuser",
+  "pk": 4,
+  "fields": {
+    "last_login": null,
+    "is_superuser": false,
+    "username": "u3",
+    "is_staff": false,
+    "is_active": true,
+    "date_joined": "2022-09-11T12:07:52.904Z",
+    "first_name": "\u0420\u043e\u043c\u0430\u043d",
+    "last_name": "\u0424\u0440\u043e\u043b\u043e\u0432",
+    "email": "u3@foodgram.ru",
+    "password": "pbkdf2_sha256$150000$nFJu2K8XXFzo$0lXzMTggJxiAB6aUX6hVF/Eig449cCrg4/zye0fU9Ik=",
+    "groups": [],
+    "user_permissions": []
+  }
+},
+{
+  "model": "users.subscriber",
+  "pk": 1,
+  "fields": {
+    "user": 1,
+    "author": 2,
+    "date_subscriber": "2022-09-11T12:10:39.708Z"
+  }
+}
+]

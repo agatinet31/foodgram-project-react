@@ -8,7 +8,7 @@ DEBUG = os.getenv('DEBUG', False)
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SECRET_KEY = os.getenv('SECRET_KEY')
+SECRET_KEY = os.getenv('SECRET_KEY', 'insecure#key')
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
@@ -29,7 +29,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
-    'api.apps.ApiConfig',
+    # 'api.apps.ApiConfig',
     'debug_toolbar',
 ]
 

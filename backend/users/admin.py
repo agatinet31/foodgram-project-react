@@ -2,52 +2,12 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.translation import gettext_lazy as _
 
-from users.forms import CustomUserChangeForm, CustomUserCreationForm
 from users.models import CustomUser, Subscriber
 
 
-class SubscribersInlineAdmin(admin.TabularInline):
-    model = CustomUser.subscribed.through
-    fk_name = 'user'
-
-
+@admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     """Класс определяющий настройки кастомной модели User в админке."""
-    # inlines = (SubscribersInlineAdmin,)
-    add_form = CustomUserCreationForm
-    form = CustomUserChangeForm
-    model = CustomUser
-    fieldsets = (
-        (None, {
-            'fields': (
-                'username',
-                'password'
-            )
-        }
-        ),
-        (_('Personal info'), {
-            'fields': (
-                'first_name',
-                'last_name',
-                'email'
-            )
-        }),
-        (_('Subscribed / Subscribers'), {
-            'fields': (
-                'subscribed',
-            )
-        }),
-        (_('Permissions'), {
-            'fields': (
-                'is_active',
-                'is_staff',
-                'is_superuser',
-                'groups',
-                'user_permissions'
-            ),
-        }),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
-    )    
     add_fieldsets = (
         (None, {
             'classes': ('wide',),
@@ -61,22 +21,13 @@ class CustomUserAdmin(UserAdmin):
             ),
         }),
     )
-    # autocomplete_fields = ('subscribed',)
-    filter_horizontal = ('subscribed', )
-    list_display = ('username', 'first_name', 'last_name', 'email', )
-    list_filter = ('username', 'first_name', 'last_name', 'email',)
+    list_filter = ('username', 'email',)
 
 
-admin.site.register(CustomUser, CustomUserAdmin)
-
-"""
-
-        (_('Subscribed / Subscribers'), {
-            'fields': (
-                'subscribed',
-                'subscribers'
-            )
-        }),
-
-    filter_horizontal = ('subscribed', 'subscribers')
-"""
+@admin.register(Subscriber)
+class SubscriberAdmin(admin.ModelAdmin):
+    """Конфигурация для модели Subscriber в админке."""
+    list_display = ('user', 'author', 'date_subscriber')
+    list_filter = ('user', 'author',)
+    search_fields = ('user', 'author',)
+    empty_value_display = _('empty')
