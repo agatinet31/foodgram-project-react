@@ -63,7 +63,6 @@ class Ingredient(models.Model):
     name = models.CharField(
         _('name'),
         max_length=250,
-        unique=True,
         validators=[validate_simple_name],
         help_text=_(
             'Required. Enter ingredient name, please. '
@@ -84,6 +83,12 @@ class Ingredient(models.Model):
 
     class Meta:
         """Метаданные модели ингридиентов."""
+        constraints = [
+            models.UniqueConstraint(
+                fields=['name', 'measurement_unit'],
+                name='unique_name_measurement_unit'
+            )
+        ]
         ordering = ['name']
         verbose_name = _('ingredient')
         verbose_name_plural = _('ingredients')
