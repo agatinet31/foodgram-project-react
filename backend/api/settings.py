@@ -1,8 +1,6 @@
 VERSION_API_V1 = 'v1'
 
-USER_ME = 'ME'
-
-EMAIL_ADMIN = 'admin@yandb.ru'
+EMAIL_ADMIN = 'admin@foodgram.ru'
 
 USERS_URL_PREFIX = 'users'
 

@@ -255,3 +255,9 @@ msgstr "подписка"
 #: .\users\models.py:112
 msgid "subscribers"
 msgstr "подписки"
+
+msgid "User cannot follow himself."
+msgstr "Пользователь не может подписаться на себя."
+
+msgid "The ME username is reserved. Specify another please."
+msgstr "Имя пользователя МЕ зарезервировано. Укажите другое пожалуйста."

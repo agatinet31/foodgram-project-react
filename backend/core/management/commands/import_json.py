@@ -10,9 +10,9 @@ UNKNOW_MODEL_MESSAGE = 'Unknow model {model} was provided'
 
 class Command(BaseCommand):
     """
-    Команда для импорта данных из csv-файла в записи моделей Django.
+    Команда для импорта данных из json-файла в записи моделей Django.
     Имеет два обязатлеьных параметра:
-    --path - полный путь до csv-файла
+    --path - полный путь до json-файла
     --model - имя модели, в которую импортируем данные
 
     Пример вызова:

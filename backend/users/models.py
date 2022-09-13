@@ -1,11 +1,12 @@
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
 from django.core.validators import EmailValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from api.settings import USER_ME
 from core.utils import is_not_empty_query
 from core.validators import validate_only_letters
+from users.settings import USER_ME
 
 
 class CustomUser(AbstractUser):
@@ -71,6 +72,17 @@ class CustomUser(AbstractUser):
         """Проверка наличия подписок на авторов."""
         return is_not_empty_query(self.subscribed)
 
+    def clean(self):
+        """Валидация модели."""
+        if self.username.upper() == USER_ME:
+            raise ValidationError(
+                {
+                    'username':
+                    _('The ME username is reserved. Specify another please.')
+                }
+            )
+        super().clean()
+
     def __str__(self):
         """Вывод данных пользователя."""
         return f'{self.username} ({self.get_full_name()}), email: {self.email}'
@@ -110,6 +122,11 @@ class Subscriber(models.Model):
         ]
         verbose_name = _('subscriber')
         verbose_name_plural = _('subscribers')
+
+    def clean(self):
+        """Валидация модели."""
+        if self.user == self.author:
+            raise ValidationError({'author': _('User cannot follow himself.')})
 
     def __str__(self):
         """Вывод подписчика и автора."""
