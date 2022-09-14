@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, validate_slug
 from django.db import models
+from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 from core.utils import is_not_empty_query
@@ -52,6 +53,13 @@ class Tag(models.Model):
         ordering = ['name']
         verbose_name = _('tag')
         verbose_name_plural = _('tags')
+
+    def colored_name(self):
+        return format_html(
+            '<span style="color: {};">{}</span>',
+            self.color,
+            self.color,
+        )
 
     def __str__(self):
         """Метод возвращает имя тега."""
