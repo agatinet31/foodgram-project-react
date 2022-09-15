@@ -1,7 +1,8 @@
+from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, validate_slug
 from django.db import models
-from django.utils.html import format_html
+from django.db.models import Count
 from django.utils.translation import gettext_lazy as _
 
 from core.utils import is_not_empty_query
@@ -27,7 +28,7 @@ class Tag(models.Model):
             'unique': _('A tag with that name already exists.'),
         }
     )
-    color = models.CharField(
+    color = ColorField(
         _('color HEX-code'),
         max_length=7,
         unique=True,
@@ -53,13 +54,6 @@ class Tag(models.Model):
         ordering = ['name']
         verbose_name = _('tag')
         verbose_name_plural = _('tags')
-
-    def colored_name(self):
-        return format_html(
-            '<span style="color: {};">{}</span>',
-            self.color,
-            self.color,
-        )
 
     def __str__(self):
         """Метод возвращает имя тега."""
@@ -101,9 +95,15 @@ class Ingredient(models.Model):
         verbose_name = _('ingredient')
         verbose_name_plural = _('ingredients')
 
+    @property
+    def name_with_unit(self):
+        """Метод возвращает имя ингридиента и единицу измерения."""
+        return f'{self.name ({self.measurement_unit})}'
+
     def __str__(self):
-        """Метод возвращает имя ингридиента."""
-        return self.name
+        """Метод возвращает информацию по ингридиенту."""
+        # return self.name
+        return self.name_with_unit()
 
 
 class Recipe(models.Model):

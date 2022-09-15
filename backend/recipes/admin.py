@@ -7,7 +7,8 @@ from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 @admin.register(Tag)
 class TagAdmin(admin.ModelAdmin):
     """Конфигурация для модели Tag в админке."""
-    list_display = ('name', 'slug', 'color', 'colored_name')
+    list_display = ('name', 'slug', 'color',)
+    list_editable = ('color',)
     list_filter = ('name', 'slug',)
     search_fields = ('name',)
     empty_value_display = _('empty')
