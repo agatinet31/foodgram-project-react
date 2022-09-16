@@ -2,7 +2,7 @@ from colorfield.fields import ColorField
 from django.contrib.auth import get_user_model
 from django.core.validators import MinValueValidator, validate_slug
 from django.db import models
-from django.db.models import Count
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from core.utils import is_not_empty_query
@@ -95,15 +95,9 @@ class Ingredient(models.Model):
         verbose_name = _('ingredient')
         verbose_name_plural = _('ingredients')
 
-    @property
-    def name_with_unit(self):
-        """Метод возвращает имя ингридиента и единицу измерения."""
-        return f'{self.name ({self.measurement_unit})}'
-
     def __str__(self):
-        """Метод возвращает информацию по ингридиенту."""
-        # return self.name
-        return self.name_with_unit()
+        """Метод возвращает имя ингридиента и единицу измерения."""
+        return f'{self.name} ({self.measurement_unit})'
 
 
 class Recipe(models.Model):
@@ -114,6 +108,26 @@ class Recipe(models.Model):
         validators=[validate_simple_name],
         help_text=_(
             'Required. Enter name recipe, please.'),
+    )
+    pub_date = models.DateTimeField(
+        _('public date'),
+        default=timezone.now,
+        db_index=True
+    )
+    image = models.ImageField(
+        _('image'),
+        upload_to='recipes/',
+    )
+    text = models.TextField(
+        _('recipe text'),
+    )
+    cooking_time = models.PositiveSmallIntegerField(
+        _('cooking time (minutes)'),
+        validators=[
+            MinValueValidator(
+                1, message=_('Minimum cooking time 1 minute')
+            )
+        ]
     )
     ingredients = models.ManyToManyField(
         Ingredient,
@@ -146,26 +160,6 @@ class Recipe(models.Model):
         verbose_name=_('shopping_carts'),
         blank=True,
         related_name='shopping_cart_recipes',
-    )
-    pub_date = models.DateTimeField(
-        _('public date'),
-        auto_now_add=True,
-        db_index=True
-    )
-    image = models.ImageField(
-        _('image'),
-        upload_to='recipes/',
-    )
-    text = models.TextField(
-        _('recipe text'),
-    )
-    cooking_time = models.PositiveSmallIntegerField(
-        _('cooking_time'),
-        validators=[
-            MinValueValidator(
-                1, message=_('Minimum cooking time 1 minute')
-            )
-        ]
     )
 
     class Meta:

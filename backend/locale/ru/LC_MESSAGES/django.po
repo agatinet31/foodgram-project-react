@@ -166,8 +166,8 @@ msgid "recipe text"
 msgstr "текст рецепта"
 
 #: .\recipes\models.py:150
-msgid "cooking_time"
-msgstr "время приготовления"
+msgid "cooking time (minutes)"
+msgstr "время приготовления (минут)"
 
 #: .\recipes\models.py:153
 msgid "Minimum cooking time 1 minute"
@@ -268,3 +268,5 @@ msgstr "Введите валидное значение hex для цвета, 
 msgid "Required. Enter ingredient name, please. 250 characters or fewer. Letters, digit symbols _ ( \" ). The first symbol only letter."
 msgstr "Обязательное поле. Введите наименование ингридиента, 250 символов или менее. Буквы, цифры и символы _ ( \" ). Первый символ буква."
 
+msgid "amount_favorites"
+msgstr "общее число добавлений в избранное"
