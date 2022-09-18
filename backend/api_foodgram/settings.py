@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DEBUG = os.getenv('DEBUG', False)
+DEBUG = os.getenv('DEBUG', 'FALSE').upper() == 'TRUE'
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -30,8 +30,7 @@ INSTALLED_APPS = [
     'core.apps.CoreConfig',
     'users.apps.UsersConfig',
     'recipes.apps.RecipesConfig',
-    # 'api.apps.ApiConfig',
-    'debug_toolbar',
+    'api.apps.ApiConfig',
 ]
 
 MIDDLEWARE = [
@@ -42,21 +41,14 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'debug_toolbar.middleware.DebugToolbarMiddleware',
-]
-
-INTERNAL_IPS = [
-    '127.0.0.1',
 ]
 
 ROOT_URLCONF = 'api_foodgram.urls'
 
-TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
-
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [TEMPLATES_DIR],
+        'DIRS': [],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -152,3 +144,20 @@ DJOSER = {
 AUTH_USER_MODEL = 'users.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
+
+if DEBUG:
+    MIDDLEWARE += [
+        'debug_toolbar.middleware.DebugToolbarMiddleware',
+    ]
+    INSTALLED_APPS += [
+        'debug_toolbar',
+    ]
+    INTERNAL_IPS = ['127.0.0.1',]
+
+    import mimetypes
+    mimetypes.add_type("application/javascript", ".js", True)
+
+    DEBUG_TOOLBAR_CONFIG = {
+        'INTERCEPT_REDIRECTS': False,
+    }
+    

@@ -55,6 +55,11 @@ class RecipeAdmin(admin.ModelAdmin):
         'shopping_carts'
     )
 
+    class Media:
+        css = {
+            'all': ('recipes/css/admin.css', )
+        }
+
     def has_add_permission(self, request):
         """Запрет добавления рецепта в админке."""
         return False

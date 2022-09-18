@@ -1,4 +1,5 @@
 from django.urls import include, path
+from django.views.generic import TemplateView
 from rest_framework.routers import DefaultRouter
 
 from .settings import (CATEGORY__BASENAME, CATEGORY_URL_PREFIX,
@@ -24,4 +25,10 @@ urlpatterns = [
     ),
     path('api/', include('djoser.urls')),
     path('api/', include('djoser.urls.authtoken')),
+    
+    path(
+        'docs/',
+        TemplateView.as_view(template_name='api/redoc.html'),
+        name='redoc'
+    ),
 ]

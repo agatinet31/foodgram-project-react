@@ -224,7 +224,4 @@ class RecipeIngredient(models.Model):
 
     def __str__(self):
         """Метод возвращает информацию по ингридиенту рецепта."""
-        return (
-            f'{self.recipe.name}:{self.ingredient.name}, '
-            f'{self.amount} {self.ingredient.measurement_unit}'
-        )
+        return f'{self.ingredient} - {self.amount}'
