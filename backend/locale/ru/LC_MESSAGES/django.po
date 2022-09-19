@@ -149,8 +149,14 @@ msgstr "Обязательное поле. Введите имя автора."
 msgid "favorites"
 msgstr "избранное"
 
+msgid "favorite"
+msgstr "избранное"
+
 #: .\recipes\models.py:133
 msgid "shopping_carts"
+msgstr "список покупок"
+
+msgid "shopping_cart"
 msgstr "список покупок"
 
 #: .\recipes\models.py:138
@@ -270,3 +276,6 @@ msgstr "Обязательное поле. Введите наименовани
 
 msgid "amount_favorites"
 msgstr "общее число добавлений в избранное"
+
+msgid "Аdministration Foodgram"
+msgstr "Администрирование Foodgram"

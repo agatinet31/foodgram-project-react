@@ -24,8 +24,7 @@ urlpatterns = [
         name='get_user_jwt_token'
     ),
     path('api/', include('djoser.urls')),
-    path('api/', include('djoser.urls.authtoken')),
-    
+    path('api/', include('djoser.urls.authtoken')),    
     path(
         'docs/',
         TemplateView.as_view(template_name='api/redoc.html'),
