@@ -1,32 +1,40 @@
-import uuid
-
 from django.contrib.auth import get_user_model
-from django.core.mail import EmailMessage
-from django.db.models import Avg
-from django.shortcuts import get_object_or_404
-from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, viewsets
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
+from djoser.views import UserViewSet
+# from django.shortcuts import get_object_or_404
+# from django_filters.rest_framework import DjangoFilterBackend
+from rest_framework import filters  # , mixins
+# from rest_framework.decorators import api_view, permission_classes
+# from rest_framework.permissions import AllowAny, IsAuthenticated
+# from rest_framework.response import Response
+from rest_framework.viewsets import ReadOnlyModelViewSet
 
-#from api.filters import TitlesFilter
-from api.permissions import AnyReadOnly, IsAdmin, UserAccountPermission
-from api.settings import EMAIL_ADMIN, USER_ME
-from api.viewsets import AdminOrReadOnlyViewSet, YamdbBaseViewSet
+from api.serializers import TagSerializer, IngredientSerializer
+from recipes.models import Tag, Ingredient
 
-#from reviews.models import Category, Genre, Review, Title
-
+# from api.filters import TitlesFilter
+# from api.permissions import AnyReadOnly, IsAdmin
 
 User = get_user_model()
 
-@api_view(['POST'])
-@permission_classes([AllowAny])
-def new_user_registration(request):
-    """Регистрация нового пользователя."""
-    pass
+
+"""
+class CreateUserViewSet(UserViewSet):
+    ViewSet-класс регистрации нового пользователя.
+    queryset = User.objects.all()
+    serializer_class = CustomUserCreateSerializer
+    # http_method_names = ["post", "get", "put", "delete"]
+"""
 
 
-class UserViewSet(viewsets.ModelViewSet):
-    """ViewSet-класс для просмотра информации по пользователям."""
-    pass
+class TagViewSet(ReadOnlyModelViewSet):
+    """ViewSet-класс для просмотра информации по тегам."""
+    queryset = Tag.objects.all()
+    serializer_class = TagSerializer
+
+
+class IngredientViewSet(ReadOnlyModelViewSet):
+    """ViewSet-класс для просмотра информации по ингридиентам."""
+    queryset = Ingredient.objects.all()
+    serializer_class = IngredientSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('^name',)

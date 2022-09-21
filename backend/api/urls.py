@@ -1,30 +1,50 @@
 from django.urls import include, path
 from django.views.generic import TemplateView
+from djoser.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 
-from .settings import (CATEGORY__BASENAME, CATEGORY_URL_PREFIX,
-                       COMMENTS__BASENAME, COMMENTS_URL_PREFIX,
-                       GENRE__BASENAME, GENRE_URL_PREFIX, REVIEW__BASENAME,
-                       REVIEW_URL_PREFIX, TITLE__BASENAME, TITLE_URL_PREFIX,
-                       USERS_BASENAME, USERS_URL_PREFIX, VERSION_API_V1)
-from .token import CustomTokenView
+from api.views import TagViewSet, IngredientViewSet
 
 app_name = 'api'
 
 router = DefaultRouter()
+router.register('tags', TagViewSet, basename='tags')
+router.register('ingredients', IngredientViewSet, basename='ingredients')
+
+user_urlpatterns = [
+    path(
+        'users/',
+        UserViewSet.as_view({'get': 'list', 'post': 'create'}),
+        name='users'
+    ),
+    path(
+        'users/<int:id>/',
+        UserViewSet.as_view({'get': 'retrieve'}),
+        name='user-info'
+    ),
+    path(
+        'users/me/',
+        UserViewSet.as_view({'get': 'me'}),
+        name='user-me'
+    ),
+    path(
+        'users/set_password/',
+        UserViewSet.as_view({'post': 'set-password'}),
+        name='user_set_password'
+    ),
+]
 
 urlpatterns = [
     path(
-        f'{VERSION_API_V1}/',
-        include(router.urls)
-    ),   
-    path(
-        f'{VERSION_API_V1}/auth/token/',
-        CustomTokenView.as_view(),
-        name='get_user_jwt_token'
+        '', include(router.urls)
     ),
-    path('api/', include('djoser.urls')),
-    path('api/', include('djoser.urls.authtoken')),    
+    
+    path(
+        '', include(user_urlpatterns)
+    ),
+    path(
+        'auth/', include('djoser.urls.authtoken')
+    ),
     path(
         'docs/',
         TemplateView.as_view(template_name='api/redoc.html'),

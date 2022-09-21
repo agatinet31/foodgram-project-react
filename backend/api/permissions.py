@@ -1,9 +1,7 @@
-from rest_framework.exceptions import MethodNotAllowed
+# from rest_framework.exceptions import MethodNotAllowed
 from rest_framework.permissions import (SAFE_METHODS, BasePermission,
                                         IsAuthenticated,
                                         IsAuthenticatedOrReadOnly)
-
-from .settings import USER_ME
 
 
 class DeafaultYamdbPermission(IsAuthenticatedOrReadOnly):
@@ -51,10 +49,13 @@ class IsAdmin(IsAuthenticated):
         )
 
 
+""""
+djoser.permissions.CurrentUserOrAdmin
+
 class UserAccountPermission(IsAdmin):
-    """
-    Класс предоставляющий права доступа пользователю me.
-    """
+
+
+
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
@@ -64,3 +65,5 @@ class UserAccountPermission(IsAdmin):
         if request.method == 'DELETE':
             raise MethodNotAllowed('Нельзя удалить себя')
         return request.method in ('GET', 'PATCH')
+
+"""

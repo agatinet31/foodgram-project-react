@@ -18,10 +18,10 @@ class AuthViewSet(mixins.CreateModelMixin,
     permission_classes = [IsAdmin]
 
 
-class AdminOrReadOnlyViewSet(mixins.CreateModelMixin,
-                             mixins.ListModelMixin,
-                             mixins.DestroyModelMixin,
-                             viewsets.GenericViewSet):
+class ReadOnlyViewSet(mixins.ListModelMixin,
+                      mixins.ListModelMixin,
+                      mixins.DestroyModelMixin,
+                      viewsets.GenericViewSet):
     """
     Класс Viewset обеспечивающий выполнение
      `create()`, `destroy()` и `list()` функций для справочников системы.

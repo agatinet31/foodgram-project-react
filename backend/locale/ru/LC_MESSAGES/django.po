@@ -279,3 +279,15 @@ msgstr "общее число добавлений в избранное"
 
 msgid "Аdministration Foodgram"
 msgstr "Администрирование Foodgram"
+
+msgid "Bad request (400)"
+msgstr "Ошибка на стороне пользователя (400)"
+
+msgid "The resource can not be found (404)"
+msgstr "Ресурс не найден (404)"
+
+msgid "Server error (500)"
+msgstr "Ошибка сервера (500)"
+
+msgid "Users must have an email address"
+msgstr "Для пользователя должен быть указан адрес электронной почты"

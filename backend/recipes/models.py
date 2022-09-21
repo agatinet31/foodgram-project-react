@@ -175,10 +175,12 @@ class Recipe(models.Model):
 
     @property
     def is_favorited(self):
+        """Проверка наличия рецепта в избранном у пользователей."""
         return is_not_empty_query(self.favorites)
 
     @property
     def is_in_shopping_cart(self):
+        """Проверка наличия рецепта в списке покупок у пользователей."""
         return is_not_empty_query(self.shopping_carts)
 
     def __str__(self):
