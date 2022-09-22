@@ -5,7 +5,6 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
-from core.utils import is_not_empty_query
 from core.validators import (validate_color_hex_code, validate_only_letters,
                              validate_simple_name, validate_tag)
 
@@ -176,12 +175,12 @@ class Recipe(models.Model):
     @property
     def is_favorited(self):
         """Проверка наличия рецепта в избранном у пользователей."""
-        return is_not_empty_query(self.favorites)
+        return self.favorites.exists()
 
     @property
     def is_in_shopping_cart(self):
         """Проверка наличия рецепта в списке покупок у пользователей."""
-        return is_not_empty_query(self.shopping_carts)
+        return self.shopping_carts.exists()
 
     def __str__(self):
         """Метод возвращает название рецепта."""

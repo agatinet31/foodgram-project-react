@@ -1,3 +1,6 @@
-def is_not_empty_query(query):
-    """Проверка наличия записей в QyerySet."""
-    return query.all().count() > 0
+def get_int(str):
+    """Безопасное преобразование строки в в целое число."""
+    try:
+        return int(str)
+    except TypeError:
+        return None

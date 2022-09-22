@@ -4,39 +4,42 @@ from django.core.validators import EmailValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
-from core.utils import is_not_empty_query
 from core.validators import validate_only_letters
 from users.settings import USER_ME
 
 
 class CustomUserManager(BaseUserManager):
-    def create_user(self, email, username, first_name, last_name, password=None):
+    def create_user(
+        self, email, username, first_name, last_name, password=None
+    ):
         """
-        Создает и сохраняет пользователя с обязательными полями email, username, 
-        first_name, last_name и password.
+        Создает и сохраняет пользователя с обязательными полями:
+        email, username, first_name, last_name и password.
         """
         if not email:
             raise ValueError(_('Users must have an email address'))
         user = self.model(
             email=self.normalize_email(email),
-            username=username, 
-            first_name=first_name, 
+            username=username,
+            first_name=first_name,
             last_name=last_name,
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, first_name, last_name, password=None):
+    def create_superuser(
+        self, email, username, first_name, last_name, password=None
+    ):
         """
-        Создает и сохраняет суперпользователя с обязательными полями email, username, 
-        first_name, last_name и password.
+        Создает и сохраняет суперпользователя с обязательными полями:
+        email, username, first_name, last_name и password.
         """
         user = self.create_user(
             email,
             password=password,
-            username=username, 
-            first_name=first_name, 
+            username=username,
+            first_name=first_name,
             last_name=last_name,
         )
         user.is_superuser = True
@@ -109,10 +112,11 @@ class CustomUser(AbstractUser):
         """Проверка административных прав у пользователя."""
         return self.is_staff or self.is_superuser
 
-    @property
-    def is_subscribed(self):
-        """Проверка наличия подписок на авторов."""
-        return is_not_empty_query(self.subscribed)
+    def is_subscribed(self, author=None):
+        """Проверка наличия подписок на автора."""
+        if author is None:
+            return self.subscribed.exists()
+        return self.subscribed.filter(pk=author.pk).exists()
 
     def clean(self):
         """Валидация модели."""
