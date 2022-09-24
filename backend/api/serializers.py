@@ -1,9 +1,10 @@
 from django.contrib.auth import get_user_model
+# from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
-from core.utils import get_int
 from recipes.models import Ingredient, Recipe, Tag
+from users.models import Subscriber
 
 # from rest_framework.exceptions import ValidationError
 # from rest_framework.generics import get_object_or_404
@@ -42,6 +43,8 @@ class IngredientSerializer(serializers.ModelSerializer):
 
 class RecipeShortInfoSerializer(serializers.ModelSerializer):
     """Сериализатор с краткой информацией рецепта."""
+    image = serializers.SerializerMethodField()
+
     class Meta:
         model = Recipe
         fields = (
@@ -51,9 +54,32 @@ class RecipeShortInfoSerializer(serializers.ModelSerializer):
             'cooking_time',
         )
 
+    def get_image(self, obj):
+        return self.context['request'].build_absolute_uri(obj.image.url)
 
-class SubscribeSerializer(CustomUserSerializer):
-    """Сериализатор подписок на пользователей."""
+
+class SubscribeParamsSerializer(serializers.Serializer):
+    """Сериализатор query параметров для подписок на пользователей."""
+    recipes_limit = serializers.IntegerField(required=False, min_value=1)
+
+
+class SubscribeCreateSerializer(serializers.ModelSerializer):
+    """Сериализатор создания подписки."""
+    class Meta:
+        model = Subscriber
+        fields = '__all__'
+
+    def create(self, validated_data):
+        return Subscriber.objects.create(**validated_data)
+
+    def validate(self, attrs):
+        instance = Subscriber(**attrs)
+        instance.full_clean()
+        return attrs
+
+
+class SubscribeInfoSerializer(CustomUserSerializer):
+    """Сериализатор информации по подпискам пользователей."""
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
 
@@ -64,15 +90,17 @@ class SubscribeSerializer(CustomUserSerializer):
         )
 
     def get_recipes(self, user):
-        """Список рецептов ."""
-        request = self.context.get('request')
-        recipes_limit = get_int(request.GET.get('recipes_limit'))
-        """
-        queryset = Recipe.objects.filter(author__id=obj.id).order_by('id')[
-                :recipes_limit]
-        """
-        queryset = None
-        return RecipeShortInfoSerializer(queryset, many=True).data
+        """Список рецептов пользователя."""
+        recipes_limit = self.context.get('recipes_limit')
+        recipes = user.author_recipes.all()
+        if recipes_limit:
+            recipes = recipes[:recipes_limit]
+        return RecipeShortInfoSerializer(
+            recipes,
+            many=True,
+            context=self.context
+        ).data
 
     def get_recipes_count(self, user):
-        return 0
+        """Возвращает количество рецептов."""
+        return user.author_recipes.count()

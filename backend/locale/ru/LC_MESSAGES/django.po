@@ -291,3 +291,12 @@ msgstr "Ошибка сервера (500)"
 
 msgid "Users must have an email address"
 msgstr "Для пользователя должен быть указан адрес электронной почты"
+
+msgid "The request did not specify the user id parameter"
+msgstr "В запросе не указан параметр id пользователя"
+
+msgid "The user is not following the author with the specified id"
+msgstr "Пользователь не подписан на автора с указаным идентификатором"
+
+msgid "Recipes_limit query parameter - minimum value 1"
+msgstr "Параметр запроса recipes_limit - минимальное значение 1"
