@@ -1,11 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
-# from django.db import IntegrityError, transaction
 from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserSerializer
+# from django.db import IntegrityError, transaction
+from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
-from recipes.models import Ingredient, Recipe, Tag
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import Subscriber
 
 # from rest_framework.exceptions import ValidationError
@@ -24,9 +25,9 @@ class CustomUserSerializer(UserSerializer):
     def get_is_subscribed(self, author):
         """Проверка наличия подписок у пользователя."""
         user = self.context.get('request').user
-        if user.is_authenticated:
-            return user.is_subscribed(author)
-        return False
+        if user.is_anonymous:
+            return False
+        return user.is_subscribed(author)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -57,6 +58,7 @@ class RecipeShortInfoSerializer(serializers.ModelSerializer):
         )
 
     def get_image(self, obj):
+        """Возвращает абсолюьный URL картинки."""
         return self.context['request'].build_absolute_uri(obj.image.url)
 
 
@@ -160,3 +162,93 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
             instance=recipe,
             context=self.context
         ).data
+
+
+class SlugListField(serializers.ListField):
+    """Класс поля сериализатора для списка слагов."""
+    child = serializers.SlugField()
+
+
+class IntegerListField(serializers.ListField):
+    """Класс поля сериализатора для списка слагов."""
+    child = serializers.IntegerField(min_value=1)
+
+
+class RecipesParamsSerializer(serializers.Serializer):
+    """Сериализатор query параметров для рецептов пользователей."""
+    is_favorited = serializers.ChoiceField(
+        required=False, choices=[0, 1]
+    )
+    is_in_shopping_cart = serializers.ChoiceField(
+        required=False, choices=[0, 1]
+    )
+    author = serializers.IntegerField(
+        required=False, min_value=1,
+    )
+    tags = SlugListField(required=False, allow_empty=True)
+
+
+class RecipesIngridientSerializer(serializers.ModelSerializer):
+    """Сериализатор ингридиента рецепта."""
+    id = serializers.IntegerField(source='ingredient')
+    # recipe
+
+    class Meta:
+        model = RecipeIngredient
+        fields = (
+            'id',
+            'amount',
+        )
+
+
+class RecipesWriteSerializer(serializers.ModelSerializer):
+    """Сериализатор записи данных рецепта."""
+    ingredients = RecipesIngridientSerializer(many=True)
+    tags = IntegerListField()
+    image = Base64ImageField(represent_in_base64=True)
+    author = serializers.HiddenField(
+        default=serializers.CurrentUserDefault()
+    )
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'ingredients',
+            'tags',
+            'image',
+            'author',
+            'name',
+            'text',
+            'cooking_time'
+        )
+
+
+class RecipesReadSerializer(RecipeShortInfoSerializer):
+    """Сериализатор чтения данных рецепта."""
+    tags = TagSerializer(many=True)
+    author = CustomUserSerializer()
+    ingredients = IngredientSerializer(many=True)
+
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = RecipeShortInfoSerializer.Meta.fields + (
+            'ingredients',
+            'tags',
+            'image',
+            'name',
+            'text',
+            'cooking_time'
+        )
+
+    def get_is_favorited(self, recipe):
+        """Проверка наличия подписок у пользователя."""
+        user = self.context.get('request').user
+        return recipe.is_favorited(user)
+
+    def get_is_in_shopping_cart(self, recipe):
+        """Проверка наличия подписок у пользователя."""
+        user = self.context.get('request').user
+        return recipe.is_in_shopping_cart(user)

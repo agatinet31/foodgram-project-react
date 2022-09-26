@@ -5,6 +5,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+from core.utils import is_exists_user_info
 from core.validators import (validate_color_hex_code, validate_only_letters,
                              validate_simple_name, validate_tag)
 
@@ -172,15 +173,13 @@ class Recipe(models.Model):
         verbose_name = _('recipe')
         verbose_name_plural = _('recipes')
 
-    @property
-    def is_favorited(self):
-        """Проверка наличия рецепта в избранном у пользователей."""
-        return self.favorites.exists()
+    def is_favorited(self, user=None):
+        """Проверка наличия рецепта в избранном у пользователя."""
+        return is_exists_user_info(self.favorites, user)
 
-    @property
-    def is_in_shopping_cart(self):
-        """Проверка наличия рецепта в списке покупок у пользователей."""
-        return self.shopping_carts.exists()
+    def is_in_shopping_cart(self, user=None):
+        """Проверка наличия рецепта в списке покупок у пользователя."""
+        return is_exists_user_info(self.shopping_carts, user)
 
     def __str__(self):
         """Метод возвращает название рецепта."""

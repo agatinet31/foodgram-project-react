@@ -4,6 +4,7 @@ from django.core.validators import EmailValidator
 from django.db import models
 from django.utils.translation import gettext_lazy as _
 
+from core.utils import is_exists_user_info
 from core.validators import validate_only_letters
 from users.settings import USER_ME
 
@@ -114,9 +115,7 @@ class CustomUser(AbstractUser):
 
     def is_subscribed(self, author=None):
         """Проверка наличия подписок на автора."""
-        if author is None:
-            return self.subscribed.exists()
-        return self.subscribed.filter(pk=author.pk).exists()
+        return is_exists_user_info(self.subscribed, author)
 
     def clean(self):
         """Валидация модели."""

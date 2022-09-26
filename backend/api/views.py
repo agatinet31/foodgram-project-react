@@ -4,7 +4,7 @@ from django.db.models import Sum
 # from django.utils.translation import gettext_lazy as _
 from djoser.views import UserViewSet
 # from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins
+from rest_framework import filters, mixins, viewsets
 from rest_framework.decorators import action
 # , status
 # viewsets
@@ -16,8 +16,9 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from api.pagination import CustomPagination
 from api.report import PDFPrint
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
-                             ShoppingCartSerializer, SubscribeParamsSerializer,
-                             SubscribeSerializer, TagSerializer)
+                             RecipesParamsSerializer, ShoppingCartSerializer,
+                             SubscribeParamsSerializer, SubscribeSerializer,
+                             TagSerializer)
 from api.viewsets import UserDataViewSet
 # from core.utils import get_object_or_400
 from recipes.models import Ingredient, Recipe, Tag
@@ -117,3 +118,33 @@ class ShoppingCartViewSet(mixins.CreateModelMixin,
             total=Sum('ingredients__ingredient_recipes__amount')
         ).order_by('ingredients__name')
         return PDFPrint().create_pdf(shopping_carts_ingredients)
+
+
+class RecipesViewSet(viewsets.ModelViewSet):
+    """ViewSet-класс для модели рецептов."""
+    queryset = Recipe.objects.all()
+    pagination_class = CustomPagination
+    lookup_field = 'id'
+
+    def get_serializer_context(self):
+        """Возвращает контекст сериализатора."""
+        context = super().get_serializer_context()
+        query = RecipesParamsSerializer(data=self.request.query_params)
+        if query.is_valid(raise_exception=True):
+            query_params = query.validated_data
+            context['is_favorited'] = query_params.get('is_favorited')
+            context['is_in_shopping_cart'] = query_params.get(
+                'is_in_shopping_cart'
+            )
+            context['author'] = query_params.get('author')
+            context['tags'] = query_params.get('tags')
+        return context
+
+    def get_queryset(self):
+        """Возвращает выборку данных по рецептам."""
+        return Recipe.objects.all()
+
+    def get_serializer_class(self):
+        if self.action == "create":
+            return None
+        return None
