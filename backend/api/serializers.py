@@ -1,5 +1,7 @@
 from django.contrib.auth import get_user_model
-# from django.utils.translation import gettext_lazy as _
+from django.shortcuts import get_object_or_404
+# from django.db import IntegrityError, transaction
+from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserSerializer
 from rest_framework import serializers
 
@@ -63,21 +65,6 @@ class SubscribeParamsSerializer(serializers.Serializer):
     recipes_limit = serializers.IntegerField(required=False, min_value=1)
 
 
-class SubscribeCreateSerializer(serializers.ModelSerializer):
-    """Сериализатор создания подписки."""
-    class Meta:
-        model = Subscriber
-        fields = '__all__'
-
-    def create(self, validated_data):
-        return Subscriber.objects.create(**validated_data)
-
-    def validate(self, attrs):
-        instance = Subscriber(**attrs)
-        instance.full_clean()
-        return attrs
-
-
 class SubscribeInfoSerializer(CustomUserSerializer):
     """Сериализатор информации по подпискам пользователей."""
     recipes = serializers.SerializerMethodField()
@@ -104,3 +91,72 @@ class SubscribeInfoSerializer(CustomUserSerializer):
     def get_recipes_count(self, user):
         """Возвращает количество рецептов."""
         return user.author_recipes.count()
+
+
+class SubscribeSerializer(serializers.ModelSerializer):
+    """Сериализатор создания подписки."""
+    class Meta:
+        model = Subscriber
+        fields = '__all__'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Subscriber.objects.all(),
+                fields=['user', 'author'],
+                message=_('The user is already following the author')
+            )
+        ]
+
+    def to_representation(self, instance):
+        author = get_object_or_404(User, pk=instance.author.pk)
+        return SubscribeInfoSerializer(
+            instance=author,
+            context=self.context
+        ).data
+
+    def validate(self, data):
+        """Дополнительная проверка наличия подписки на себя."""
+        if data['user'] == data['author']:
+            raise serializers.ValidationError(_('User cannot follow himself.'))
+        return data
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    """Сериализатор избранного."""
+    class Meta:
+        model = Recipe.favorites.through
+        fields = '__all__'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Recipe.favorites.through.objects.all(),
+                fields=['customuser', 'recipe'],
+                message=_('Recipe already added to favorites')
+            )
+        ]
+
+    def to_representation(self, instance):
+        recipe = get_object_or_404(Recipe, pk=instance.recipe.pk)
+        return RecipeShortInfoSerializer(
+            instance=recipe,
+            context=self.context
+        ).data
+
+
+class ShoppingCartSerializer(serializers.ModelSerializer):
+    """Сериализатор списка покупок."""
+    class Meta:
+        model = Recipe.shopping_carts.through
+        fields = '__all__'
+        validators = [
+            serializers.UniqueTogetherValidator(
+                queryset=Recipe.shopping_carts.through.objects.all(),
+                fields=['customuser', 'recipe'],
+                message=_('Recipe already added to shopping list')
+            )
+        ]
+
+    def to_representation(self, instance):
+        recipe = get_object_or_404(Recipe, pk=instance.recipe.pk)
+        return RecipeShortInfoSerializer(
+            instance=recipe,
+            context=self.context
+        ).data

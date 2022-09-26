@@ -300,3 +300,21 @@ msgstr "Пользователь не подписан на автора с ук
 
 msgid "Recipes_limit query parameter - minimum value 1"
 msgstr "Параметр запроса recipes_limit - минимальное значение 1"
+
+msgid "The user is already following the author"
+msgstr "Пользователь уже подписан на автора"
+
+msgid "Recipe already added to favorites"
+msgstr "Рецепт уже добавлен в избранное"
+
+msgid "Recipe already added to shopping list"
+msgstr "Рецепт уже добавлен в список покупок"
+
+msgid "Shopping list"
+msgstr "Cписок покупок"
+
+msgid "unit"
+msgstr "единица"
+
+msgid "Foodgram is an online service on which users can publish recipes."
+msgstr "Foodgram - онлайн-сервис, на котором пользователи могут публиковать рецепты."

@@ -3,14 +3,18 @@ from django.views.generic import TemplateView
 from djoser.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 
-from api.views import (IngredientViewSet, SubscribeViewSet, TagViewSet,
-                       UserListViewSet)
+from api.views import (FavoriteViewSet, IngredientViewSet, ShoppingCartViewSet,
+                       SubscribeViewSet, TagViewSet, UserListViewSet)
 
 app_name = 'api'
 
 router = DefaultRouter()
-router.register('tags', TagViewSet, basename='tags')
-router.register('ingredients', IngredientViewSet, basename='ingredients')
+router.register(
+    'tags', TagViewSet, basename='tags'
+)
+router.register(
+    'ingredients', IngredientViewSet, basename='ingredients'
+)
 
 user_urlpatterns = [
     path(
@@ -40,8 +44,26 @@ user_urlpatterns = [
     ),
     path(
         'users/<int:id>/subscribe/',
-        SubscribeViewSet.as_view({'post': 'create', 'delete': 'delete'}),
+        SubscribeViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
         name='subscribe'
+    ),
+]
+
+add_recipe_urlpatterns = [
+    path(
+        'recipes/<int:id>/favorite/',
+        FavoriteViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
+        name='favorite'
+    ),
+    path(
+        'recipes/<int:id>/shopping_cart/',
+        ShoppingCartViewSet.as_view({'post': 'create', 'delete': 'destroy'}),
+        name='shopping-cart-detail'
+    ),
+    path(
+        'recipes/download_shopping_cart/',
+        ShoppingCartViewSet.as_view({'get': 'download_shopping_cart'}),
+        name='shopping-cart-download'
     ),
 ]
 
@@ -50,8 +72,10 @@ urlpatterns = [
         '', include(router.urls)
     ),
     path(
+        '', include(add_recipe_urlpatterns)
+    ),
+    path(
         '', include(user_urlpatterns)
-        # '', include('djoser.urls')
     ),
     path(
         'auth/', include('djoser.urls.authtoken')
