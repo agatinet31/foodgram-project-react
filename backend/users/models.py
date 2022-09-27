@@ -113,7 +113,7 @@ class CustomUser(AbstractUser):
         """Проверка административных прав у пользователя."""
         return self.is_staff or self.is_superuser
 
-    def is_subscribed(self, author=None):
+    def is_subscribed(self, author):
         """Проверка наличия подписок на автора."""
         return is_exists_user_info(self.subscribed, author)
 

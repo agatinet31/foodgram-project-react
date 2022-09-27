@@ -3,8 +3,9 @@ from django.views.generic import TemplateView
 from djoser.views import UserViewSet
 from rest_framework.routers import DefaultRouter
 
-from api.views import (FavoriteViewSet, IngredientViewSet, ShoppingCartViewSet,
-                       SubscribeViewSet, TagViewSet, UserListViewSet)
+from api.views import (FavoriteViewSet, IngredientViewSet, RecipesViewSet,
+                       ShoppingCartViewSet, SubscribeViewSet, TagViewSet,
+                       UserListViewSet)
 
 app_name = 'api'
 
@@ -14,6 +15,9 @@ router.register(
 )
 router.register(
     'ingredients', IngredientViewSet, basename='ingredients'
+)
+router.register(
+    'recipes', RecipesViewSet, basename='recipes'
 )
 
 user_urlpatterns = [
@@ -69,10 +73,10 @@ add_recipe_urlpatterns = [
 
 urlpatterns = [
     path(
-        '', include(router.urls)
+        '', include(add_recipe_urlpatterns)
     ),
     path(
-        '', include(add_recipe_urlpatterns)
+        '', include(router.urls)
     ),
     path(
         '', include(user_urlpatterns)

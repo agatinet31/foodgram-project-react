@@ -16,7 +16,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from api.pagination import CustomPagination
 from api.report import PDFPrint
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
-                             RecipesParamsSerializer, ShoppingCartSerializer,
+                             RecipesParamsSerializer, RecipesReadSerializer,
+                             RecipesWriteSerializer, ShoppingCartSerializer,
                              SubscribeParamsSerializer, SubscribeSerializer,
                              TagSerializer)
 from api.viewsets import UserDataViewSet
@@ -115,7 +116,7 @@ class ShoppingCartViewSet(mixins.CreateModelMixin,
         shopping_carts_ingredients = user.shopping_cart_recipes.values(
             'ingredients__name', 'ingredients__measurement_unit'
         ).annotate(
-            total=Sum('ingredients__ingredient_recipes__amount')
+            total=Sum('recipe_ingredients__amount')
         ).order_by('ingredients__name')
         return PDFPrint().create_pdf(shopping_carts_ingredients)
 
@@ -132,19 +133,36 @@ class RecipesViewSet(viewsets.ModelViewSet):
         query = RecipesParamsSerializer(data=self.request.query_params)
         if query.is_valid(raise_exception=True):
             query_params = query.validated_data
-            context['is_favorited'] = query_params.get('is_favorited')
+            context['is_favorited'] = query_params.get(
+                'is_favorited'
+            )
             context['is_in_shopping_cart'] = query_params.get(
                 'is_in_shopping_cart'
             )
-            context['author'] = query_params.get('author')
-            context['tags'] = query_params.get('tags')
+            author = query_params.get('author')
+            context['author'] = author.pk if author else None
+            tags_slug = query_params.get('tags')
+            context['tags'] = (
+                [slug.pk for slug in tags_slug] if tags_slug else None
+            )
         return context
 
     def get_queryset(self):
         """Возвращает выборку данных по рецептам."""
-        return Recipe.objects.all()
+        queryset = super().get_queryset()
+        context = self.get_serializer_context()
+        user = self.request.user
+        if context['is_favorited']:
+            queryset = queryset.filter(favorites__id=user.pk)
+        if context['is_in_shopping_cart']:
+            queryset = queryset.filter(shopping_carts__id=user.pk)
+        if context['author']:
+            queryset = queryset.filter(author__id=context['author'])
+        if context['tags']:
+            queryset = queryset.filter(tags__id__in=context['tags']).distinct()
+        return queryset.all()
 
     def get_serializer_class(self):
-        if self.action == "create":
-            return None
-        return None
+        if self.action in ('list', 'retrieve'):
+            return RecipesReadSerializer
+        return RecipesWriteSerializer

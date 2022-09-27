@@ -38,7 +38,7 @@ class UserDataViewSet(viewsets.GenericViewSet):
         return dict(zip(self._get_pk_field(), pk_values))
 
     def get_object(self):
-        """Возвращает объект для """
+        """Возвращает объект по первичному ключу."""
         obj_info = self._get_request_data()
         queryset = self.get_queryset()
         return get_object_or_400(queryset, **obj_info)

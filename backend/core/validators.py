@@ -33,7 +33,7 @@ validate_tag = RegexValidator(
     'invalid'
 )
 
-simple_name_re = _lazy_re_compile(r'^[^\W\d_][\w ()\"]+$')
+simple_name_re = _lazy_re_compile(r'^[^\W\d_][\w \-()]+$')
 validate_simple_name = RegexValidator(
     tag_re,
     _(

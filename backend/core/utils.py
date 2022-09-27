@@ -50,12 +50,10 @@ def get_object_or_403(klass, *args, **kwargs):
         raise PermissionDenied(*e.args)
 
 
-def is_exists_user_info(queryset, user=None):
+def is_exists_user_info(queryset, user):
     """
     Проверка наличия связаной информации по пользователю в queryset.
     """
-    if user is None:
-        return queryset.exists()
     if user.is_anonymous:
         return False
     return queryset.filter(pk=user.pk).exists()

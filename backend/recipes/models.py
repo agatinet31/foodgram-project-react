@@ -105,7 +105,6 @@ class Recipe(models.Model):
     name = models.CharField(
         _('name'),
         max_length=500,
-        validators=[validate_simple_name],
         help_text=_(
             'Required. Enter name recipe, please.'),
     )
@@ -173,11 +172,11 @@ class Recipe(models.Model):
         verbose_name = _('recipe')
         verbose_name_plural = _('recipes')
 
-    def is_favorited(self, user=None):
+    def is_favorited(self, user):
         """Проверка наличия рецепта в избранном у пользователя."""
         return is_exists_user_info(self.favorites, user)
 
-    def is_in_shopping_cart(self, user=None):
+    def is_in_shopping_cart(self, user):
         """Проверка наличия рецепта в списке покупок у пользователя."""
         return is_exists_user_info(self.shopping_carts, user)
 
