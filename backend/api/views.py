@@ -160,7 +160,7 @@ class RecipesViewSet(viewsets.ModelViewSet):
             queryset = queryset.filter(author__id=context['author'])
         if context['tags']:
             queryset = queryset.filter(tags__id__in=context['tags']).distinct()
-        return queryset.all()
+        return queryset
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):

@@ -1,5 +1,5 @@
 from django.contrib.auth import get_user_model
-from django.db import IntegrityError, transaction
+from django.db import DatabaseError, IntegrityError, transaction
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserSerializer
@@ -188,18 +188,13 @@ class RecipesIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор ингридиента рецепта."""
     id = serializers.PrimaryKeyRelatedField(
         queryset=Ingredient.objects.all(),
-        source='ingredient.id'
+        source='ingredient'
     )
     name = serializers.ReadOnlyField(
         source='ingredient.name'
     )
     measurement_unit = serializers.ReadOnlyField(
         source='ingredient.measurement_unit'
-    )
-    recipe = serializers.PrimaryKeyRelatedField(
-        queryset=Recipe.objects.all(),
-        write_only=True,
-        required=False
     )
 
     class Meta:
@@ -209,7 +204,6 @@ class RecipesIngredientSerializer(serializers.ModelSerializer):
             'name',
             'measurement_unit',
             'amount',
-            'recipe',
         )
 
 
@@ -269,27 +263,85 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    def validate_ingredients(self, ingredients):
+        unique_ingredients_id = {
+            ingredient['ingredient'].pk for ingredient in ingredients
+        }
+        if len(unique_ingredients_id) != len(ingredients):
+            raise serializers.ValidationError(_('ID ingredients not unique'))
+        return ingredients
+
+    def validate_tags(self, tags):
+        tags_id = {tag.pk for tag in tags}
+        if len(tags_id) != len(tags):
+            raise serializers.ValidationError(_('ID tags not unique'))
+        return tags
+
+    def _get_ingredients_recipe(self, recipe, validated_ingredients):
+        """Формирует список ингридиентов для записи в БД."""
+        return [
+            RecipeIngredient(
+                recipe=recipe, **ingredient
+            )
+            for ingredient in validated_ingredients
+        ]
+
+    def _get_tags_recipe(self, recipe, validated_tags):
+        """Формирует список тегов для записи в БД."""
+        return [
+            Recipe.tags.through(
+                recipe=recipe, tag=tag
+            )
+            for tag in validated_tags
+        ]
+
+    def _set_ingredients_recipe(self, recipe, validated_ingredients):
+        """Устанавливает список ингридиентов для рецепта в БД."""
+        ingredients = self._get_ingredients_recipe(
+            recipe, validated_ingredients
+        )
+        if ingredients:
+            recipe.ingredients.clear()
+            RecipeIngredient.objects.bulk_create(ingredients)
+
+    def _set_tags_recipe(self, recipe, validated_tags):
+        """Устанавливает список тегов для рецепта в БД."""
+        tags = self._get_tags_recipe(recipe, validated_tags)
+        if tags:
+            recipe.tags.clear()
+            Recipe.tags.through.objects.bulk_create(tags)
+
     def create(self, validated_data):
         try:
-            recipe = self.perform_create(validated_data)
-        except IntegrityError:
+            return self.perform_create(validated_data)
+        except (IntegrityError, DatabaseError):
             self.fail(_('Cannot create recipe'))
-        return recipe
 
     def perform_create(self, validated_data):
         with transaction.atomic():
             ingredients = validated_data.pop('ingredients')
-            tags_id = validated_data.pop('tags')
+            tags = validated_data.pop('tags')
             recipe = Recipe.objects.create(**validated_data)
-            for ingredient in ingredients:
-                ingredient['recipe'] = recipe.pk
-            RecipeIngredient.objects.bulk_create(ingredients)
-            tags = [{'tag': tag, 'recipe': recipe.pk} for tag in tags_id]
-            Recipe.tags.through.objects.bulk_create(tags)
+            self._set_ingredients_recipe(recipe, ingredients)
+            self._set_tags_recipe(recipe, tags)
         return recipe
 
     def update(self, instance, validated_data):
-        return super().update(instance, validated_data)
+        try:
+            return self.perform_update(instance, validated_data)
+        except (IntegrityError, DatabaseError):
+            self.fail(_('Cannot update recipe'))
+
+    def perform_update(self, instance, validated_data):
+        with transaction.atomic():
+            ingredients = validated_data.pop('ingredients')
+            tags = validated_data.pop('tags')
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+            self._set_ingredients_recipe(instance, ingredients)
+            self._set_tags_recipe(instance, tags)
+        return instance
 
     def to_representation(self, instance):
         return RecipesReadSerializer(

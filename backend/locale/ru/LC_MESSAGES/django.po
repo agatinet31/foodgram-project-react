@@ -318,3 +318,15 @@ msgstr "единица"
 
 msgid "Foodgram is an online service on which users can publish recipes."
 msgstr "Foodgram - онлайн-сервис, на котором пользователи могут публиковать рецепты."
+
+msgid "Cannot create recipe"
+msgstr "Не удается создать рецет"
+
+msgid "Ingredients in the recipe should not be repeated"
+msgstr "Ингридиенты в рецепте не должны повторятся"
+
+msgid "ID tags not unique"
+msgstr "Идентификаторы тегов не уникальны"
+
+msgid "ID ingredients not unique"
+msgstr "Идентификаторы ингридиентов не уникальны"
