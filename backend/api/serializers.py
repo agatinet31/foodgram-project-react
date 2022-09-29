@@ -263,22 +263,31 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    def _check_unique_id(self, values, error_message):
+        """Проверка уникальности первичных ключей в списке записей values."""
+        values_id = {value.pk for value in values}
+        if len(values_id) != len(values):
+            raise serializers.ValidationError(error_message)
+        return True
+
     def validate_ingredients(self, ingredients):
-        unique_ingredients_id = {
-            ingredient['ingredient'].pk for ingredient in ingredients
-        }
-        if len(unique_ingredients_id) != len(ingredients):
-            raise serializers.ValidationError(_('ID ingredients not unique'))
+        """Валидация уникальности идентификаторов ингредиентов."""
+        self._check_unique_id(
+            [ingredient['ingredient'] for ingredient in ingredients],
+            _('ID ingredients not unique')
+        )
         return ingredients
 
     def validate_tags(self, tags):
-        tags_id = {tag.pk for tag in tags}
-        if len(tags_id) != len(tags):
-            raise serializers.ValidationError(_('ID tags not unique'))
+        """Валидация уникальности тегов."""
+        self._check_unique_id(
+            tags,
+            _('ID tags not unique')
+        )
         return tags
 
     def _get_ingredients_recipe(self, recipe, validated_ingredients):
-        """Формирует список ингридиентов для записи в БД."""
+        """Формирует список ингредиентов для записи в БД."""
         return [
             RecipeIngredient(
                 recipe=recipe, **ingredient
@@ -311,39 +320,40 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             recipe.tags.clear()
             Recipe.tags.through.objects.bulk_create(tags)
 
-    def create(self, validated_data):
-        try:
-            return self.perform_create(validated_data)
-        except (IntegrityError, DatabaseError):
-            self.fail(_('Cannot create recipe'))
-
-    def perform_create(self, validated_data):
+    def perform_recipe_action(self, validated_data, instance=None):
+        """
+        Выполнение в одной транзакции операций
+        записи/обновления по рецепту, ингредиентам и тегам.
+        """
         with transaction.atomic():
             ingredients = validated_data.pop('ingredients')
             tags = validated_data.pop('tags')
-            recipe = Recipe.objects.create(**validated_data)
-            self._set_ingredients_recipe(recipe, ingredients)
-            self._set_tags_recipe(recipe, tags)
-        return recipe
-
-    def update(self, instance, validated_data):
-        try:
-            return self.perform_update(instance, validated_data)
-        except (IntegrityError, DatabaseError):
-            self.fail(_('Cannot update recipe'))
-
-    def perform_update(self, instance, validated_data):
-        with transaction.atomic():
-            ingredients = validated_data.pop('ingredients')
-            tags = validated_data.pop('tags')
-            for attr, value in validated_data.items():
-                setattr(instance, attr, value)
-            instance.save()
+            if instance:
+                for attr, value in validated_data.items():
+                    setattr(instance, attr, value)
+                instance.save()
+            else:
+                instance = Recipe.objects.create(**validated_data)
             self._set_ingredients_recipe(instance, ingredients)
             self._set_tags_recipe(instance, tags)
         return instance
 
+    def create(self, validated_data):
+        """Создает запись в БД по рецепту."""
+        try:
+            return self.perform_recipe_action(validated_data)
+        except (IntegrityError, DatabaseError):
+            self.fail(_('Cannot create recipe'))
+
+    def update(self, instance, validated_data):
+        """Обновление записи в БД по рецепту."""
+        try:
+            return self.perform_recipe_action(validated_data, instance)
+        except (IntegrityError, DatabaseError):
+            self.fail(_('Cannot update recipe'))
+
     def to_representation(self, instance):
+        """Возвращает информацию по рецепту."""
         return RecipesReadSerializer(
             instance=instance,
             context=self.context
