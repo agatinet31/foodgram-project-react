@@ -6,6 +6,10 @@ from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
 
+from core.utils import (create_ordered_dicts_from_objects,
+                        get_field_values_from_dict,
+                        get_from_dicts_field_values,
+                        get_from_objects_field_values)
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 from users.models import CustomUser, Subscriber
 
@@ -265,23 +269,31 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
 
     def _check_unique_id(self, values, error_message):
         """Проверка уникальности первичных ключей в списке записей values."""
-        values_id = {value.pk for value in values}
-        if len(values_id) != len(values):
+        unique_values_id = set(values)
+        if len(unique_values_id) != len(values):
             raise serializers.ValidationError(error_message)
         return True
 
     def validate_ingredients(self, ingredients):
-        """Валидация уникальности идентификаторов ингредиентов."""
+        """Валидация уникальности ингредиентов."""
+        ingredients_id = get_from_dicts_field_values(
+            ingredients,
+            'ingredient'
+        )
         self._check_unique_id(
-            [ingredient['ingredient'] for ingredient in ingredients],
+            ingredients_id,
             _('ID ingredients not unique')
         )
         return ingredients
 
     def validate_tags(self, tags):
         """Валидация уникальности тегов."""
-        self._check_unique_id(
+        tags_id = get_from_objects_field_values(
             tags,
+            'id'
+        )
+        self._check_unique_id(
+            tags_id,
             _('ID tags not unique')
         )
         return tags
@@ -289,7 +301,7 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
     def _get_ingredients_recipe(self, recipe, validated_ingredients):
         """Формирует список ингредиентов для записи в БД."""
         return [
-            RecipeIngredient(
+            Recipe.ingredients.through(
                 recipe=recipe, **ingredient
             )
             for ingredient in validated_ingredients
@@ -299,58 +311,129 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
         """Формирует список тегов для записи в БД."""
         return [
             Recipe.tags.through(
-                recipe=recipe, tag=tag
+                recipe=recipe, **tag
             )
             for tag in validated_tags
         ]
 
-    def _set_ingredients_recipe(self, recipe, validated_ingredients):
-        """Устанавливает список ингридиентов для рецепта в БД."""
-        ingredients = self._get_ingredients_recipe(
-            recipe, validated_ingredients
+    def _create_recipe_m2m_data(
+        self, recipe, queryset, data, obj_generator
+    ):
+        """Создание связанных с рецептом данных."""
+        bulk_objs = obj_generator(recipe, data)
+        queryset.objects.bulk_create(bulk_objs)
+
+    def _update_recipe_m2m_data(
+        self, recipe, queryset, data, obj_generator, *fields
+    ):
+        """Обновление связанных с рецептом данных."""
+        if not fields:
+            raise ValueError(
+                _('Recipe data cannot be set. Field list missing.')
+            )
+        new_data_id = set(get_from_dicts_field_values(data, *fields))
+        db_values_id = set(
+            queryset.objects.filter(
+                recipe=recipe
+            ).values_list(*fields)
         )
-        if ingredients:
-            recipe.ingredients.clear()
-            RecipeIngredient.objects.bulk_create(ingredients)
-
-    def _set_tags_recipe(self, recipe, validated_tags):
-        """Устанавливает список тегов для рецепта в БД."""
-        tags = self._get_tags_recipe(recipe, validated_tags)
-        if tags:
-            recipe.tags.clear()
-            Recipe.tags.through.objects.bulk_create(tags)
-
-    def perform_recipe_action(self, validated_data, instance=None):
-        """
-        Выполнение в одной транзакции операций
-        записи/обновления по рецепту, ингредиентам и тегам.
-        """
-        with transaction.atomic():
-            ingredients = validated_data.pop('ingredients')
-            tags = validated_data.pop('tags')
-            if instance:
-                for attr, value in validated_data.items():
-                    setattr(instance, attr, value)
-                instance.save()
-            else:
-                instance = Recipe.objects.create(**validated_data)
-            self._set_ingredients_recipe(instance, ingredients)
-            self._set_tags_recipe(instance, tags)
-        return instance
+        update_id = set()
+        if len(fields) > 1:
+            update_id = new_data_id - db_values_id
+            new_data_id = {(pk[0],) for pk in new_data_id}
+            db_values_id = {(pk[0],) for pk in db_values_id}
+        insert_id = new_data_id - db_values_id
+        delete_id = db_values_id - new_data_id
+        update_id = {id for id in update_id if (id[0],) not in insert_id}
+        if delete_id:
+            filter_id = {}
+            filter_id['recipe'] = recipe
+            filter_id[f'{fields[0]}__in'] = delete_id
+            queryset.objects.filter(**filter_id).delete()
+        if update_id:
+            filter_id = {}
+            update_fields = fields[1:]
+            filter_id['recipe'] = recipe
+            for data_id in update_id:
+                filter_id[f'{fields[0]}'] = data_id[0]
+                update_values = dict(zip(update_fields, data_id[1:]))
+                queryset.objects.filter(**filter_id).update(**update_values)
+        if insert_id:
+            insert_data = [
+                obj for obj in data if get_field_values_from_dict(
+                    obj, fields[0]
+                ) in insert_id
+            ]
+            self._create_recipe_m2m_data(
+                recipe, queryset, insert_data, obj_generator
+            )
 
     def create(self, validated_data):
         """Создает запись в БД по рецепту."""
         try:
-            return self.perform_recipe_action(validated_data)
+            return self.perform_recipe_create(validated_data)
         except (IntegrityError, DatabaseError):
             self.fail(_('Cannot create recipe'))
+
+    def perform_recipe_create(self, validated_data):
+        """
+        Выполнение в одной транзакции операций
+        записи данных по рецепту, ингредиентам и тегам.
+        """
+        with transaction.atomic():
+            ingredients = validated_data.pop('ingredients')
+            tags = validated_data.pop('tags')
+            tags = create_ordered_dicts_from_objects(tags, 'tag')
+            instance = Recipe.objects.create(**validated_data)
+            self._create_recipe_m2m_data(
+                instance,
+                Recipe.ingredients.through,
+                ingredients,
+                self._get_ingredients_recipe
+            )
+            self._create_recipe_m2m_data(
+                instance,
+                Recipe.tags.through,
+                tags,
+                self._get_tags_recipe
+            )
+        return instance
 
     def update(self, instance, validated_data):
         """Обновление записи в БД по рецепту."""
         try:
-            return self.perform_recipe_action(validated_data, instance)
+            return self.perform_recipe_update(validated_data, instance)
         except (IntegrityError, DatabaseError):
             self.fail(_('Cannot update recipe'))
+
+    def perform_recipe_update(self, validated_data, instance):
+        """
+        Выполнение в одной транзакции операций
+        по обновлению данных по рецепту, ингредиентам и тегам.
+        """
+        with transaction.atomic():
+            ingredients = validated_data.pop('ingredients')
+            tags = validated_data.pop('tags')
+            tags = create_ordered_dicts_from_objects(tags, 'tag')
+            for attr, value in validated_data.items():
+                setattr(instance, attr, value)
+            instance.save()
+            self._update_recipe_m2m_data(
+                instance,
+                Recipe.ingredients.through,
+                ingredients,
+                self._get_ingredients_recipe,
+                'ingredient',
+                'amount'
+            )
+            self._update_recipe_m2m_data(
+                instance,
+                Recipe.tags.through,
+                tags,
+                self._get_tags_recipe,
+                'tag'
+            )
+        return instance
 
     def to_representation(self, instance):
         """Возвращает информацию по рецепту."""

@@ -330,3 +330,9 @@ msgstr "Идентификаторы тегов не уникальны"
 
 msgid "ID ingredients not unique"
 msgstr "Идентификаторы ингридиентов не уникальны"
+
+msgid "Cannot update recipe"
+msgstr "Не удается обновить данные по рецепту"
+
+msgid "Recipe data cannot be set. Field list missing."
+msgstr "Данные по рецепту не переданы для обновления."

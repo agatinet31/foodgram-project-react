@@ -9,11 +9,12 @@ from rest_framework.decorators import action
 # , status
 # viewsets
 # from rest_framework.decorators import api_view, permission_classes
-# from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticatedOrReadOnly
 # from rest_framework.response import Response
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
 from api.pagination import CustomPagination
+from api.permissions import IsOwnerOnly
 from api.report import PDFPrint
 from api.serializers import (FavoriteSerializer, IngredientSerializer,
                              RecipesParamsSerializer, RecipesReadSerializer,
@@ -26,7 +27,7 @@ from recipes.models import Ingredient, Recipe, Tag
 from users.models import Subscriber
 
 # from api.filters import TitlesFilter
-# from api.permissions import AnyReadOnly, IsAdmin
+
 
 User = get_user_model()
 
@@ -56,6 +57,7 @@ class SubscribeViewSet(mixins.ListModelMixin,
                        UserDataViewSet):
     """ViewSet-класс для модели подписок пользователей."""
     serializer_class = SubscribeSerializer
+    permission_classes = (IsOwnerOnly,)
     pagination_class = CustomPagination
     user_field = 'user'
     obj_field = 'author'
@@ -80,6 +82,7 @@ class FavoriteViewSet(mixins.CreateModelMixin,
                       UserDataViewSet):
     """ViewSet-класс для избранного."""
     serializer_class = FavoriteSerializer
+    permission_classes = (IsOwnerOnly,)
     user_field = 'customuser'
     obj_field = 'recipe'
     obj_model = Recipe
@@ -96,6 +99,7 @@ class ShoppingCartViewSet(mixins.CreateModelMixin,
                           UserDataViewSet):
     """ViewSet-класс для избранного."""
     serializer_class = ShoppingCartSerializer
+    permission_classes = (IsOwnerOnly,)
     user_field = 'customuser'
     obj_field = 'recipe'
     obj_model = Recipe
@@ -123,6 +127,7 @@ class ShoppingCartViewSet(mixins.CreateModelMixin,
 
 class RecipesViewSet(viewsets.ModelViewSet):
     """ViewSet-класс для модели рецептов."""
+    permission_classes = [IsAuthenticatedOrReadOnly | IsOwnerOnly]
     queryset = Recipe.objects.all()
     pagination_class = CustomPagination
     lookup_field = 'id'
