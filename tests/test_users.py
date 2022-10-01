@@ -41,7 +41,6 @@ class TestUsersAPI:
             f'Страница `{url}` работает не правильно'
         )
 
-
     @pytest.mark.django_db(transaction=True)
     def test_create_user_valid_request(self, client):
         url = self.url_users
