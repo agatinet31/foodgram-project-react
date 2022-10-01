@@ -11,10 +11,7 @@ from core.utils import (create_ordered_dicts_from_objects,
                         get_from_dicts_field_values,
                         get_from_objects_field_values)
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
-from users.models import CustomUser, Subscriber
-
-# from rest_framework.exceptions import ValidationError
-# from rest_framework.generics import get_object_or_404
+from users.models import Subscriber
 
 User = get_user_model()
 
@@ -89,7 +86,7 @@ class SubscribeInfoSerializer(CustomUserSerializer):
         if recipes_limit:
             recipes = recipes[:recipes_limit]
         return RecipeShortInfoSerializer(
-            recipes,
+            instance=recipes,
             many=True,
             context=self.context
         ).data
@@ -178,7 +175,7 @@ class RecipesParamsSerializer(serializers.Serializer):
     )
     author = serializers.PrimaryKeyRelatedField(
         required=False,
-        queryset=CustomUser.objects.all()
+        queryset=User.objects.all()
     )
     tags = serializers.SlugRelatedField(
         required=False,

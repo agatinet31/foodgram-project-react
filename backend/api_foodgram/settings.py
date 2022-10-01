@@ -142,6 +142,8 @@ AUTH_USER_MODEL = 'users.CustomUser'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
+SITE_URL = os.getenv('SITE_URL', 'https://foodgram.com')
+
 if DEBUG:
     MIDDLEWARE += [
         'debug_toolbar.middleware.DebugToolbarMiddleware',

@@ -38,7 +38,7 @@ user_urlpatterns = [
     ),
     path(
         'users/set_password/',
-        UserViewSet.as_view({'post': 'set-password'}),
+        UserViewSet.as_view({'post': 'set_password'}),
         name='user-set-password'
     ),
     path(

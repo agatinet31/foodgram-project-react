@@ -14,12 +14,23 @@ class TestRequirements:
         except FileNotFoundError:
             assert False, 'Проверьте, что добавили файл requirements.txt'
 
-        assert 'gunicorn' in requirements, (
-            'Проверьте, что добавили gunicorn в файл requirements.txt'
+        pip_package = (
+            'django',
+            'django_colorfield',
+            'django-extra-fields',
+            'django-filter',
+            'djangorestframework',
+            'djoser',
+            'gunicorn',
+            'Pillow',
+            'pytest-django',
+            'psycopg2-binary',
+            'python-dotenv',
+            'reportlab',
+            'webcolors'
         )
-        assert 'django' in requirements, (
-            'Проверьте, что добавили django в файл requirements.txt'
-        )
-        assert 'pytest-django' in requirements, (
-            'Проверьте, что добавили pytest-django в файл requirements.txt'
-        )
+        for package_name in pip_package:
+            assert package_name in requirements, (
+                f'Проверьте, что добавили {package_name} '
+                'в файл requirements.txt'
+            )

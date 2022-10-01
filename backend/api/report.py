@@ -1,9 +1,8 @@
-import os
 from io import BytesIO
 
+from django.conf import settings
 from django.http import HttpResponse
 from django.utils.translation import gettext_lazy as _
-from dotenv import load_dotenv
 from reportlab.lib import colors
 from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
 from reportlab.lib.fonts import addMapping
@@ -16,10 +15,6 @@ from reportlab.pdfgen import canvas
 from reportlab.platypus import Paragraph, SimpleDocTemplate
 from reportlab.platypus.flowables import Spacer
 from reportlab.platypus.tables import Table, TableStyle
-
-load_dotenv()
-
-SITE_URL = os.getenv('SITE_URL', 'https://foodgram.com')
 
 registerFont(TTFont('Times', 'times.ttf', 'UTF-8'))
 registerFont(TTFont('Times-Bold', 'timesbd.ttf', 'UTF-8'))
@@ -102,7 +97,7 @@ class PDFPrint:
         w, h = header.wrap(doc.width, doc.topMargin)
         header.drawOn(canvas, doc.leftMargin, doc.height + doc.topMargin - h)
         footer = Paragraph(
-            SITE_URL,
+            settings.SITE_URL,
             self.styles['Header-footer']
         )
         w, h = footer.wrap(doc.width, doc.bottomMargin)
