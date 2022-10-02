@@ -2,7 +2,8 @@ import tempfile
 
 import pytest
 
-from recipes.models import Recipe, Tag, Ingredient
+from recipes.models import Ingredient, Recipe, Tag
+from users.models import Subscriber
 
 
 @pytest.fixture
@@ -51,7 +52,7 @@ def ingredient_2():
 @pytest.fixture
 def ingredient_3():
     return Ingredient.objects.create(
-        name='Ингридиент2',
+        name='Ингридиент3',
         measurement_unit='кг'
     )
 
@@ -65,30 +66,33 @@ def recipe_user(user, another_user, ingredient_1, ingredient_2, tag1, tag2):
         cooking_time=10,
         author=user
     )
-    Recipe.objects.ingredients.through.create(
+    Recipe.ingredients.through.objects.create(
         recipe=recipe,
         ingredient=ingredient_1,
         amount=1
     )
-    Recipe.objects.ingredients.through.create(
+    Recipe.ingredients.through.objects.create(
         recipe=recipe,
         ingredient=ingredient_2,
         amount=2
     )
-    Recipe.objects.tags.through.create(
+    Recipe.tags.through.objects.create(
         recipe=recipe,
         tag=tag1
     )
-    Recipe.objects.tags.through.create(
+    Recipe.tags.through.objects.create(
         recipe=recipe,
         tag=tag2
     )
-    from fixture_user import another_user
-    Recipe.objects.favorites.through.create(
+    Recipe.favorites.through.objects.create(
         recipe=recipe,
         customuser=another_user
     )
-    Recipe.objects.shopping_carts.through.create(
+    Recipe.shopping_carts.through.objects.create(
+        recipe=recipe,
+        customuser=user
+    )
+    Recipe.shopping_carts.through.objects.create(
         recipe=recipe,
         customuser=another_user
     )
@@ -104,17 +108,20 @@ def recipe_another_user(another_user, ingredient_3, tag2, tag3):
         cooking_time=10,
         author=another_user
     )
-    Recipe.objects.ingredients.through.create(
-        recipe=recipe,
-        ingredient=ingredient_3,
-        amount=1
-    )
-    Recipe.objects.tags.through.create(
-        recipe=recipe,
-        tag=tag2
-    )
-    Recipe.objects.tags.through.create(
-        recipe=recipe,
-        tag=tag3
-    )
     return recipe
+
+
+@pytest.fixture
+def favorite_recipe_another_user(recipe_another_user, user):
+    return Recipe.favorites.through.objects.create(
+        recipe=recipe_another_user,
+        customuser=user
+    )
+
+
+@pytest.fixture
+def subscription_user_to_another_user(another_user, user):
+    return Subscriber.objects.create(
+        user=user,
+        author=another_user
+    )

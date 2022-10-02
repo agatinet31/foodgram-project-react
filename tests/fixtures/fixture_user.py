@@ -21,11 +21,6 @@ def user(django_user_model, another_user):
         first_name='first_name1',
         last_name='last_name1'
     )
-    from users.models import Subscriber
-    Subscriber.objects.create(
-        user=user_account,
-        author=another_user
-    )
     return user_account
 
 

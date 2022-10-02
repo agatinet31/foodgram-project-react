@@ -165,6 +165,7 @@ class Subscriber(models.Model):
                 name='check_not_loop_user_author'
             ),
         ]
+        ordering = ['-date_subscriber']
         verbose_name = _('subscriber')
         verbose_name_plural = _('subscribers')
 
