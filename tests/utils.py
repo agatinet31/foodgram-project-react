@@ -12,7 +12,7 @@ def get_response_data(client, method, url, **kwargs):
     params = kwargs.get('params')
     data = kwargs.get('data')
     request_method = getattr(client, method)
-    return request_method(url, data=data, params=params)
+    return request_method(url, data=data, params=params, format='json')
 
 
 def get_fields_serializer(serializer):

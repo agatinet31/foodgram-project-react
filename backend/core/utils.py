@@ -5,28 +5,33 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework.exceptions import ParseError, PermissionDenied
 
 
-def get_field_values_from_object(obj, *fields):
+def get_field_values_from_object(obj, *fields, **kwargs):
     """
     Возвращает кортеж из значений атрибутов fields объекта.
     """
     if not isinstance(obj, object):
         raise TypeError(_('Unable to get field data'))
-    return (
+    field_values = (
         getattr(obj, field) for field in fields if hasattr(obj, field)
     )
+    if not field_values:
+        return None
+    if kwargs.get('only_one_field'):
+        return field_values
+    return field_values
 
 
-def get_from_objects_field_values(records, *fields):
+def get_from_objects_field_values(records, *fields, **kwargs):
     """
     Возвращает список, состоящий из кортежей значений полей fields
     списка объектов records.
     """
     return [
-        get_field_values_from_object(obj, *fields) for obj in records
+        get_field_values_from_object(obj, *fields, **kwargs) for obj in records
     ]
 
 
-def get_field_values_from_dict(data, *fields):
+def get_field_values_from_dict(data, *fields, **kwargs):
     """
     Возвращает кортеж значений полей из словаря data.
     """
@@ -37,18 +42,22 @@ def get_field_values_from_dict(data, *fields):
             if isinstance(value, object) and hasattr(value, 'id'):
                 value = int(value.id)
             field_values.append(value)
+        if not field_values:
+            return None
+        if kwargs.get('only_one_field'):
+            return field_values[0]
         return tuple(field_values)
     except (TypeError, KeyError, ValueError):
         return None
 
 
-def get_from_dicts_field_values(records, *fields):
+def get_from_dicts_field_values(records, *fields, **kwargs):
     """
     Возвращает список, состоящий из кортежей значений полей fields
     из списка словарей records.
     """
     return [
-        get_field_values_from_dict(data, *fields) for data in records
+        get_field_values_from_dict(data, *fields, **kwargs) for data in records
     ]
 
 

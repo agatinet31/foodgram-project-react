@@ -78,36 +78,65 @@ class TestRecipesAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_create_recipe(self, user_client, recipe_user, user, ingredient_1, ingredient_2, tag1, tag2):
+    def test_create_recipe(
+        self, user_client, user,
+        ingredient_1, ingredient_2, ingredient_3, tag1, tag2
+    ):
         url = self.url_recipes
         data = {
-            'ingredients': [{'id': 1, 'amount': 1}, {'id': 2, 'amount': 1}],
-            'tags': [1],
-            'image': "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAAAAggCByxOyYQAAAABJRU5ErkJggg==",
-            'name': "string",
-            'text': "string",
-            'cooking_time': 1
+            'name': 'string',
+            'text': 'string',
+            'cooking_time': 1,
+            'ingredients': [
+                {'id': 1, 'amount': 1},
+                {'id': 2, 'amount': 2},
+                {'id': 3, 'amount': 3},
+            ],
+            'tags': [
+                1,
+                2
+            ],
+            'image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA'
+            'AEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWX'
+            'MAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA'
+            'AAggCByxOyYQAAAABJRU5ErkJggg==',
         }
-        # data = RecipesRequestSerializer(instance=recipe_user).data
         check_with_validate_data(
             user_client,
             'post',
             url,
             data=data,
             code=status.HTTP_201_CREATED,
-            # serializer=RecipesResponseSerializer
+            serializer=RecipesResponseSerializer
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_create_recipe_bad_request_400(self, user_client):
+    def test_create_recipe_bad_request_400(
+        self, user_client, ingredient_1, tag1
+    ):
         url = self.url_recipes
+        data = {
+            'name': 'string',
+            'text': 'string',
+            'cooking_time': 1,
+            'ingredients_test': [
+                {'id': 1, 'amount': 1},
+            ],
+            'tags_qwerty': [
+                1
+            ],
+            'image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA'
+            'AEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWX'
+            'MAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA'
+            'AAggCByxOyYQAAAABJRU5ErkJggg==',
+        }
         check_bad_request(
             user_client,
             'post',
             url,
-            serializer=RecipesRequestSerializer
+            data=data
         )
-  
+
     @pytest.mark.django_db(transaction=True)
     def test_create_recipe_not_authorized(self, client):
         url = self.url_recipes
@@ -118,10 +147,27 @@ class TestRecipesAPI:
         )
 
     @pytest.mark.django_db(transaction=True)
-    def test_create_recipe_bad_request_404(self, user_client):
+    def test_create_recipe_bad_request_404(
+        self, user_client, ingredient_1, tag1
+    ):
         url = self.url_recipes
-        data={
-            
+        data = {
+            'name': 'string',
+            'text': 'string',
+            'cooking_time': 1,
+            'ingredients': [
+                {'id': 1, 'amount': 1},
+                {'id': 2, 'amount': 2},
+                {'id': 3, 'amount': 3},
+            ],
+            'tags': [
+                1,
+                2
+            ],
+            'image': 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAA'
+            'AEAAAABAgMAAABieywaAAAACVBMVEUAAAD///9fX1/S0ecCAAAACXBIWX'
+            'MAAA7EAAAOxAGVKw4bAAAACklEQVQImWNoAA'
+            'AAggCByxOyYQAAAABJRU5ErkJggg==',
         }
         check_bad_request(
             user_client,

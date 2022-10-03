@@ -1,6 +1,6 @@
 from django.contrib.auth import get_user_model
 from django.db import DatabaseError, IntegrityError, transaction
-from django.shortcuts import get_object_or_404
+from django.shortcuts import get_object_or_404, get_list_or_404
 from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
@@ -187,8 +187,7 @@ class RecipesParamsSerializer(serializers.Serializer):
 
 class RecipesIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор ингридиента рецепта."""
-    id = serializers.PrimaryKeyRelatedField(
-        queryset=Ingredient.objects.all(),
+    id = serializers.IntegerField(
         source='ingredient'
     )
     name = serializers.ReadOnlyField(
@@ -241,12 +240,14 @@ class RecipesReadSerializer(RecipeShortInfoSerializer):
         return recipe.is_in_shopping_cart(user)
 
 
+class IntegerListField(serializers.ListField):
+    child = serializers.IntegerField()
+
+
 class RecipesWriteSerializer(serializers.ModelSerializer):
     """Сериализатор записи данных рецепта."""
     ingredients = RecipesIngredientSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(
-        queryset=Tag.objects.all(), many=True
-    )
+    tags = IntegerListField()
     author = serializers.HiddenField(
         default=serializers.CurrentUserDefault()
     )
@@ -275,24 +276,28 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
         """Валидация уникальности ингредиентов."""
         ingredients_id = get_from_dicts_field_values(
             ingredients,
-            'ingredient'
+            'ingredient',
+            only_one_field=True
         )
         self._check_unique_id(
             ingredients_id,
             _('ID ingredients not unique')
         )
+        get_list_or_404(Ingredient, pk__in=ingredients_id)
         return ingredients
 
     def validate_tags(self, tags):
         """Валидация уникальности тегов."""
         tags_id = get_from_objects_field_values(
             tags,
-            'id'
+            'id',
+            only_one_field=True
         )
         self._check_unique_id(
             tags_id,
             _('ID tags not unique')
         )
+        get_list_or_404(Tag, pk__in=tags_id)
         return tags
 
     def _get_ingredients_recipe(self, recipe, validated_ingredients):
