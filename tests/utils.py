@@ -29,7 +29,6 @@ def check_with_validate_data(client, method, url, **kwargs):
     pagination = kwargs.get('pagination')
     db_check_action = kwargs.get('db_check_action')
     response = get_response_data(client, method, url, **kwargs)
-    print(response.data)
     assert response.status_code != status.HTTP_404_NOT_FOUND, (
         f'Эндпоинт `{url}` не найден, проверьте этот адрес в *urls.py*'
     )
@@ -59,7 +58,7 @@ def check_with_validate_data(client, method, url, **kwargs):
             f'Ошибка валидации: {serializer.errors}'
         )
     if db_check_action:
-        pass    
+        pass
     return response.data if hasattr(response, 'data') else response
 
 

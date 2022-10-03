@@ -336,3 +336,6 @@ msgstr "Не удается обновить данные по рецепту"
 
 msgid "Recipe data cannot be set. Field list missing."
 msgstr "Данные по рецепту не переданы для обновления."
+
+msgid "Object not found"
+msgstr "Объект не найден"

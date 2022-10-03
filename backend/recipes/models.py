@@ -104,7 +104,7 @@ class Recipe(models.Model):
     """Модель рецепта."""
     name = models.CharField(
         _('name'),
-        max_length=500,
+        max_length=200,
         help_text=_(
             'Required. Enter name recipe, please.'),
     )

@@ -135,7 +135,6 @@ class RecipesViewSet(viewsets.ModelViewSet):
             context['tags'] = (
                 [slug.pk for slug in tags_slug] if tags_slug else None
             )
-        print(self.request.data)
         return context
 
     def get_queryset(self):

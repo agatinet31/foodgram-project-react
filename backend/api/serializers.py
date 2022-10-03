@@ -1,10 +1,12 @@
 from django.contrib.auth import get_user_model
 from django.db import DatabaseError, IntegrityError, transaction
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from core.utils import (create_ordered_dicts_from_objects,
                         get_field_values_from_dict,
@@ -185,9 +187,21 @@ class RecipesParamsSerializer(serializers.Serializer):
     )
 
 
+class PrimaryKey404RelatedField(serializers.PrimaryKeyRelatedField):
+    """Класс первичного ключа с обработкой ошибки 404."""
+    def to_internal_value(self, data):
+        try:
+            return super().to_internal_value(data)
+        except ValidationError as exc:
+            if 'does_not_exist' in exc.get_codes():
+                raise Http404(_('Object not found'))
+        except (TypeError, ValueError):
+            self.fail('incorrect_type', data_type=type(data))
+
+
 class RecipesIngredientSerializer(serializers.ModelSerializer):
     """Сериализатор ингридиента рецепта."""
-    id = serializers.PrimaryKeyRelatedField(
+    id = PrimaryKey404RelatedField(
         queryset=Ingredient.objects.all(),
         source='ingredient'
     )
@@ -243,8 +257,12 @@ class RecipesReadSerializer(RecipeShortInfoSerializer):
 
 class RecipesWriteSerializer(serializers.ModelSerializer):
     """Сериализатор записи данных рецепта."""
+    default_error_messages = {
+        'no_create': _('Cannot create recipe'),
+        'no_update': _('Cannot update recipe'),
+    }
     ingredients = RecipesIngredientSerializer(many=True)
-    tags = serializers.PrimaryKeyRelatedField(
+    tags = PrimaryKey404RelatedField(
         queryset=Tag.objects.all(), many=True
     )
     author = serializers.HiddenField(
@@ -263,6 +281,10 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
             'text',
             'cooking_time'
         )
+
+    def __init__(self, *args, **kwargs):
+        kwargs['partial'] = False
+        super().__init__(*args, **kwargs)
 
     def _check_unique_id(self, values, error_message):
         """Проверка уникальности первичных ключей в списке записей values."""
@@ -288,7 +310,8 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
         """Валидация уникальности тегов."""
         tags_id = get_from_objects_field_values(
             tags,
-            'id'
+            'id',
+            only_one_field=True
         )
         self._check_unique_id(
             tags_id,
@@ -371,7 +394,7 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
         try:
             return self.perform_recipe_create(validated_data)
         except (IntegrityError, DatabaseError):
-            self.fail(_('Cannot create recipe'))
+            self.fail('no_create')
 
     def perform_recipe_create(self, validated_data):
         """
@@ -400,12 +423,9 @@ class RecipesWriteSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         """Обновление записи в БД по рецепту."""
         try:
-            print(self.errors)
-            print(validated_data)  
-            print(list(self._writable_fields))  
             return self.perform_recipe_update(validated_data, instance)
         except (IntegrityError, DatabaseError):
-            self.fail(_('Cannot update recipe'))
+            self.fail('no_update')
 
     def perform_recipe_update(self, validated_data, instance):
         """
