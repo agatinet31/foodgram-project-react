@@ -9,16 +9,15 @@ def get_field_values_from_object(obj, *fields, **kwargs):
     """
     Возвращает кортеж из значений атрибутов fields объекта.
     """
+    if not fields:
+        return None
     if not isinstance(obj, object):
         raise TypeError(_('Unable to get field data'))
-    field_values = (
+    if kwargs.get('only_one_field'):
+        return getattr(obj, fields[0], None)
+    return (
         getattr(obj, field) for field in fields if hasattr(obj, field)
     )
-    if not field_values:
-        return None
-    if kwargs.get('only_one_field'):
-        return field_values
-    return field_values
 
 
 def get_from_objects_field_values(records, *fields, **kwargs):
@@ -35,6 +34,8 @@ def get_field_values_from_dict(data, *fields, **kwargs):
     """
     Возвращает кортеж значений полей из словаря data.
     """
+    if not fields:
+        return None
     try:
         field_values = []
         for key in fields:
@@ -42,8 +43,6 @@ def get_field_values_from_dict(data, *fields, **kwargs):
             if isinstance(value, object) and hasattr(value, 'id'):
                 value = int(value.id)
             field_values.append(value)
-        if not field_values:
-            return None
         if kwargs.get('only_one_field'):
             return field_values[0]
         return tuple(field_values)
