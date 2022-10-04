@@ -1,13 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.db import DatabaseError, IntegrityError, transaction
-from django.http import Http404
-from django.shortcuts import get_object_or_404
 from django.utils.translation import gettext_lazy as _
 from djoser.serializers import UserSerializer
 from drf_extra_fields.fields import Base64ImageField
 from rest_framework import serializers
-from rest_framework.exceptions import ValidationError
 
+from api.fields import PrimaryKey404RelatedField
 from core.utils import (create_ordered_dicts_from_objects,
                         get_field_values_from_dict,
                         get_from_dicts_field_values,
@@ -112,9 +110,8 @@ class SubscribeSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        author = get_object_or_404(User, pk=instance.author.pk)
         return SubscribeInfoSerializer(
-            instance=author,
+            instance=instance.author,
             context=self.context
         ).data
 
@@ -139,9 +136,8 @@ class FavoriteSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        recipe = get_object_or_404(Recipe, pk=instance.recipe.pk)
         return RecipeShortInfoSerializer(
-            instance=recipe,
+            instance=instance.recipe,
             context=self.context
         ).data
 
@@ -160,9 +156,8 @@ class ShoppingCartSerializer(serializers.ModelSerializer):
         ]
 
     def to_representation(self, instance):
-        recipe = get_object_or_404(Recipe, pk=instance.recipe.pk)
         return RecipeShortInfoSerializer(
-            instance=recipe,
+            instance=instance.recipe,
             context=self.context
         ).data
 
@@ -185,18 +180,6 @@ class RecipesParamsSerializer(serializers.Serializer):
         queryset=Tag.objects.all(),
         slug_field='slug'
     )
-
-
-class PrimaryKey404RelatedField(serializers.PrimaryKeyRelatedField):
-    """Класс первичного ключа с обработкой ошибки 404."""
-    def to_internal_value(self, data):
-        try:
-            return super().to_internal_value(data)
-        except ValidationError as exc:
-            if 'does_not_exist' in exc.get_codes():
-                raise Http404(_('Object not found'))
-        except (TypeError, ValueError):
-            self.fail('incorrect_type', data_type=type(data))
 
 
 class RecipesIngredientSerializer(serializers.ModelSerializer):

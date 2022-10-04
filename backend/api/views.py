@@ -54,9 +54,9 @@ class SubscribeViewSet(mixins.ListModelMixin,
         """Возвращает контекст сериализатора."""
         context = super().get_serializer_context()
         query = SubscribeParamsSerializer(data=self.request.query_params)
-        if query.is_valid(raise_exception=True):
-            query_params = query.validated_data
-            context['recipes_limit'] = query_params.get('recipes_limit')
+        query.is_valid(raise_exception=True)
+        query_params = query.validated_data
+        context['recipes_limit'] = query_params.get('recipes_limit')
         return context
 
     def get_queryset(self):
@@ -121,20 +121,20 @@ class RecipesViewSet(viewsets.ModelViewSet):
         """Возвращает контекст сериализатора."""
         context = super().get_serializer_context()
         query = RecipesParamsSerializer(data=self.request.query_params)
-        if query.is_valid(raise_exception=True):
-            query_params = query.validated_data
-            context['is_favorited'] = query_params.get(
-                'is_favorited'
-            )
-            context['is_in_shopping_cart'] = query_params.get(
-                'is_in_shopping_cart'
-            )
-            author = query_params.get('author')
-            context['author'] = author.pk if author else None
-            tags_slug = query_params.get('tags')
-            context['tags'] = (
-                [slug.pk for slug in tags_slug] if tags_slug else None
-            )
+        query.is_valid(raise_exception=True)
+        query_params = query.validated_data
+        context['is_favorited'] = query_params.get(
+            'is_favorited'
+        )
+        context['is_in_shopping_cart'] = query_params.get(
+            'is_in_shopping_cart'
+        )
+        author = query_params.get('author')
+        context['author'] = author.pk if author else None
+        tags_slug = query_params.get('tags')
+        context['tags'] = (
+            [slug.pk for slug in tags_slug] if tags_slug else None
+        )
         return context
 
     def get_queryset(self):
