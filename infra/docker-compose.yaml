@@ -22,7 +22,7 @@ services:
       - ./.env
 
   frontend:
-    image: agatinet/foodgram_front:v1
+    image: agatinet/foodgram_frontend:v1
     volumes:
       - result_build:/app/result_build/build/
     depends_on:
@@ -35,8 +35,8 @@ services:
     volumes:
       - static_value:/var/html/staticfiles/
       - media_value:/var/html/media/
-      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - result_build:/usr/share/nginx/html/
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf      
       - ../backend/api/static/api/:/usr/share/nginx/html/api/docs/
       
     depends_on:

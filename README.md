@@ -56,31 +56,31 @@ docker-compose up
 Выполнить миграции:
 
 ```
-docker-compose exec web python manage.py migrate
+docker-compose exec backend python manage.py migrate
 ```
 
 Создаем суперпользователя:
 
 ```
-docker-compose exec web python manage.py createsuperuser
+docker-compose exec backend python manage.py createsuperuser
 ```
 
 Собираем статику проекта:
 
 ```
-docker-compose exec web python manage.py collectstatic --no-input
+docker-compose exec backend python manage.py collectstatic --no-input
 ```
 
 Компилируем локали проекта:
 
 ```
-docker-compose exec web django-admin compilemessages
+docker-compose exec backend django-admin compilemessages
 ```
 
 Импорт тестовых данных в БД из файла с фикстурами:
 
 ```
-docker-compose exec web python manage.py loaddata /app/static/data/fixtures.json
+docker-compose exec backend python manage.py loaddata /app/static/data/fixtures.json
 ```
 
 Доступ к админке проекта:
