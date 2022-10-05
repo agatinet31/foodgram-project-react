@@ -6,6 +6,8 @@ services:
     restart: unless-stopped
     volumes:
       - postgres_db:/var/lib/postgresql/data/
+    networks:
+      - foodgram-network
     env_file:
       - ./.env  
 
@@ -17,6 +19,8 @@ services:
     volumes:
       - static_data:/app/static/
       - media_data:/app/media/
+    networks:
+      - foodgram-network    
     env_file:
       - ./.env
 
@@ -40,7 +44,9 @@ services:
       - nginx_log:/var/log/nginx/
     ports:
       - "$PORT:80"
-      - "$SSL_PORT:443"    
+      - "$SSL_PORT:443"  
+    networks:
+      - foodgram-network    
     env_file:
       - ./.env
 
@@ -50,3 +56,7 @@ volumes:
   postgres_db:
   frontend_build:
   nginx_log:
+
+networks:
+  foodgram-network:
+    driver: bridge
