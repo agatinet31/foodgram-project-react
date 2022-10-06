@@ -105,6 +105,7 @@ class Recipe(models.Model):
     name = models.CharField(
         _('name'),
         max_length=200,
+        validators=[validate_simple_name],
         help_text=_(
             'Required. Enter name recipe, please.'),
     )

@@ -35,7 +35,7 @@ validate_tag = RegexValidator(
 
 simple_name_re = _lazy_re_compile(r'^[^\W\d_][\w \-()]+$')
 validate_simple_name = RegexValidator(
-    tag_re,
+    simple_name_re,
     _(
         'Enter a valid `name` value consisting of only letters, digit. '
         'and symbols _ ( )'
