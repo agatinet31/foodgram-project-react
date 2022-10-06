@@ -18,7 +18,6 @@ class TestRequirements:
             'django',
             'django_colorfield',
             'django-extra-fields',
-            'django-filter',
             'djangorestframework',
             'djoser',
             'gunicorn',
