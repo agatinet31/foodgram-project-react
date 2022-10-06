@@ -1,10 +1,11 @@
 from django.contrib.auth import get_user_model
 from django.db.models import Sum
 from djoser.views import UserViewSet
-from rest_framework import filters, mixins, viewsets
+from rest_framework import mixins, viewsets
 from rest_framework.decorators import action
 from rest_framework.viewsets import ReadOnlyModelViewSet
 
+from api.filters import IngredientFilter
 from api.pagination import CustomPagination
 from api.permissions import IsAuthorOrAuthenticatedOrReadOnly
 from api.report import PDFPrint
@@ -35,8 +36,7 @@ class IngredientViewSet(ReadOnlyModelViewSet):
     """ViewSet-класс для просмотра информации по ингридиентам."""
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ('^name',)
+    filter_backends = (IngredientFilter,)
 
 
 class SubscribeViewSet(mixins.ListModelMixin,
