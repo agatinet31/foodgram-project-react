@@ -9,8 +9,15 @@
 ### Описание проекта:
 Проект Foodgram - сервис, на котором пользователи будут публиковать рецепты, добавлять чужие рецепты в избранное и подписываться на публикации других авторов. Сервис «Список покупок» позволит пользователям создавать список продуктов, которые нужно купить для приготовления выбранных блюд.
 ### Тестовый стенд:
-
+```
 http://foodgram-sky.ddns.net/
+```
+
+### Учетная запись администратора:
+```
+логин: admin@foodgram.ru
+пароль: 1
+```
 
 ### Запуск проекта:
 
@@ -27,6 +34,8 @@ cd infra
 Создать файл .env с переменными окружения для работы с базой данных PostgreSQL:
 
 ```
+# Доменное имя
+ALLOWED_HOSTS=example.org
 # Указываем, что работаем с postgresql
 DB_ENGINE=django.db.backends.postgresql
 # Имя базы данных
@@ -40,17 +49,23 @@ DB_HOST=db
 # Порт для подключения к БД
 DB_PORT=5432 
 ```
-Указываем IP адрес или DNS имя хоста, если проект разворачивается не локально:
+Указываем DNS имя сервиса вместо example.org и свой адрес электронной почты:
 
 ```
-- переходим в директорию nginx
-- в файле default.conf вносим корректировку для параметра server_name 
+- в файле init-letsencrypt.sh;
+- в файле data/nginx/app.conf
 ```
 
 Создаем и запускаем сервисы приложения:
 
 ```
 docker-compose up
+```
+
+Создать базу данных:
+```
+docker exec -it {имя контейнера БД} /bin/bash
+psql -U postgres -c 'create database foodgram;'
 ```
 
 Выполнить миграции:
@@ -74,21 +89,20 @@ docker-compose exec backend python manage.py collectstatic --no-input
 Компилируем локали проекта:
 
 ```
-docker-compose exec backend django-admin compilemessages
+docker-compose exec backend python manage.py makemessages
+docker-compose exec backend python compilemessages
 ```
 
-Импорт тестовых данных в БД из файла с фикстурами:
+Импорт ингредиентов в БД из файла с фикстурами:
 
 ```
-docker-compose exec backend python manage.py loaddata /app/static/data/fixtures.json
+docker-compose exec backend python manage.py import_json --path ./static/recipes/data/ingredients.json --model Ingredient
 ```
 
 Доступ к админке проекта:
 
 ```
-http://localhost/admin/ для локально расплоложенного проекта.
-Если проект расположен на другом узле в сети, 
-вместо localhost необходимо указать IP адрес или имя хоста.
+https://example.org/admin/
 ```
 
 Остановить сервисы проекта:
@@ -134,7 +148,7 @@ DEL /api/recipes/{id}/shopping_cart/ - удалить рецепт из корз
 ```
 ### Документация проекта
 ```
-Полный список эндпоинтов и примеров запросов расположен по адресу http://localhost/api/docs/
+Полный список эндпоинтов и примеров запросов расположен по адресу https://example.org/api/docs/
 ```
 ### Алгоритм регистрации пользователей
 ```
