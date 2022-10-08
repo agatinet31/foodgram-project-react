@@ -28,6 +28,9 @@ jobs:
         pip install flake8 pep8-naming flake8-broken-line flake8-return flake8-isort
         pip install -r backend/requirements.txt 
 
+    - name: Run migrations
+      run: python manage.py migrate
+
     - name: Test with Flake8 and Pytest
       run: |
         python -m flake8
