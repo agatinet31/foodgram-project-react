@@ -24,7 +24,8 @@ jobs:
 
     - name: Install for tests addions packets (ttf-mscorefonts, gettext)
       run: | 
-        sudo apt update && apt install -y ttf-mscorefonts-installer fontconfig gettext
+        sudo apt-get update
+        sudo apt-get install -y ttf-mscorefonts-installer fontconfig gettext
         sudo fc-cache -vr
 
     - name: Install dependencies
