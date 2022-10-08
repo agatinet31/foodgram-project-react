@@ -29,7 +29,7 @@ jobs:
         pip install -r backend/requirements.txt 
 
     - name: Run migrations
-      run: python manage.py migrate
+      run: python backend/manage.py migrate
 
     - name: Test with Flake8 and Pytest
       run: |
