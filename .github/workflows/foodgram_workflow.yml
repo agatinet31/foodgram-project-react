@@ -24,7 +24,7 @@ jobs:
 
     - name: Install addions packets (ttf-mscorefonts, gettext)
       run: |        
-        sudo apt-get install -y fontconfig gettext
+        sudo apt-get install -y cabextract fontconfig gettext
         sudo wget http://ftp.us.debian.org/debian/pool/contrib/m/msttcorefonts/ttf-mscorefonts-installer_3.8_all.deb
         sudo dpkg -i ttf-mscorefonts-installer_3.8_all.deb
 
