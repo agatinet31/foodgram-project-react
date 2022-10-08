@@ -25,6 +25,7 @@ jobs:
     - name: Install addion packets (ttf-mscorefonts, gettext)
       run: |        
         sudo apt-get install -y ttf-mscorefonts-installer fontconfig gettext
+        sudo fc-cache -fv
 
     - name: Install dependencies
       run: |
