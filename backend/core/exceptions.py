@@ -15,6 +15,7 @@ def core_exception_handler(exc, context):
     if response is not None:
         response_payload = {
             "error": response.data,
+            "message": str(response.data),
             "status_code": response.status_code,
             "reason": http.client.responses.get(response.status_code),
             "view_name": context["view"].__class__.__name__,

@@ -23,9 +23,9 @@ jobs:
         python-version: 3.7
 
     - name: Install for tests addions packets (ttf-mscorefonts, gettext)
-      run: |        
-        sudo add-apt-repository multiverse
-        sudo apt update && sudo apt install focal fontconfig gettext
+      run: |                
+        sudo dpkg -P ttf-mscorefonts-installer
+        sudo apt update && sudo apt install -y ttf-mscorefonts-installer fontconfig gettext
 
     - name: Install dependencies
       run: |
@@ -85,6 +85,7 @@ jobs:
             sudo docker-compose stop
             sudo docker rm ${{ secrets.BACKEND_CONTAINER_NAME }}
             sudo docker-compose up -d
+            sudo docker image prune -a -f
   
   send_message:
       runs-on: ubuntu-20.04
