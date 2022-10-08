@@ -25,8 +25,8 @@ jobs:
     - name: Install for tests addions packets (ttf-mscorefonts, gettext)
       run: | 
         sudo cat /etc/apt/sources.list
-        sudo sed -i'.bak' 's/$/ contrib non-free/' /etc/apt/sources.list
         sudo apt update && sudo apt install -y ttf-mscorefonts-installer fontconfig gettext
+        sudo cat /etc/apt/sources.list
 
     - name: Install dependencies
       run: |
