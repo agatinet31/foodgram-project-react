@@ -23,8 +23,9 @@ jobs:
         python-version: 3.7
 
     - name: Install for tests addions packets (ttf-mscorefonts, gettext)
-      run: |                
-        sudo sed -i'.bak' 's/$/ stable main contrib non-free/' /etc/apt/sources.list
+      run: | 
+        sudo touch /etc/apt/sources.list
+        sudo sed -i'.bak' 's/$/ contrib' /etc/apt/sources.list
         sudo apt update && sudo apt install -y ttf-mscorefonts-installer fontconfig gettext
 
     - name: Install dependencies
