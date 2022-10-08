@@ -22,7 +22,7 @@ jobs:
       with:
         python-version: 3.7
 
-    - name: Install for tests addions packets (ttf-mscorefonts, fontconfig and gettext)
+    - name: Install for tests addions packets (ttf-mscorefonts,fontconfig and gettext)
       run: | 
         sudo apt-get update
         echo ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true | sudo debconf-set-selections
